@@ -1,2 +1,1 @@
-# tripleifdachallenge
-Information Innovator's Submission for the Open FDA Challenge.
+DANIEL, U DO IT!  LOL!
