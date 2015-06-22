@@ -2,38 +2,58 @@ apikey = "z0wwT73I3DtNL8cxr3VUc7shQsESx0MPIyuTYQv9";
 apirooturl = "https://api.fda.gov/drug/event.json?api_key=" + apikey + "&search=";
 myBarChart = ""; //setting a global variable so we can access our chart from any function
 
-$(document).ready(function(){//on page load, set up some crap
-	//instantiate tool tips
-	$("[data-toggle='tooltip']").tooltip();
-	
-	//hide results row
-	hideResultsRow();
-	
-	//enable the search button
-	$('#btnApplySearch').click(function(){
-		getDrugNames($('#iDrug').val());
-	});
-	
-	//enable chart canvas to watch for user clicks
-	$('#chartTarg').click(function(evt){
-	    var activeBars = myBarChart.getBarsAtEvent(evt);
-		console.log(activeBars);
-		alert('congrats! You chose ' + activeBars[0].label + ' (' + activeBars[0].value + ' occurrences)\ncheck out what we logged in the console for the details on what is available during a chart click');
-	    // => activeBars is an array of bars on the canvas that are at the same position as the click event.
-	});
-	//enable the clear button
-	$('#btnClearSearch').click(function(){
-		//clear the search terms
-		$('#iDrug').val('');
-		//hide the search results select list
-		hideResultsRow();
-		if(typeof myBarChart.destroy === 'function'){myBarChart.destroy();};
-	});
-	
-	//enable the build graph button
-	$('#btnBuildGraph').click(function(){
-		getSpecificItemData($('#selSpecificProducts').val());
-	});
+$(document).ready(function () {//on page load, set up some crap
+    //instantiate tool tips
+    $("[data-toggle='tooltip']").tooltip();
+
+    //hide results row
+    hideResultsRow();
+
+    //enable the search button
+    $('#btnApplySearch').click(function () {
+        try {
+            myBarChart.clear();
+            myBarChart.destroy();
+        } catch (e) { }
+
+        if (!$('#iDrug').val().match(/^$/)) {
+            getDrugNames($('#iDrug').val());
+        } else {
+            getEventsByDate($('#startDate').val(), $('#endDate').val());
+        }
+
+    });
+
+    //enable chart canvas to watch for user clicks
+    $('#chartTarg').click(function (evt) {
+        var activeBars = myBarChart.getBarsAtEvent(evt);
+        console.log(activeBars);
+        if (activeBars.length > 0) {
+            alert('congrats! You chose ' + activeBars[0].label + ' (' + activeBars[0].value + ' occurrences)\ncheck out what we logged in the console for the details on what is available during a chart click');
+            // => activeBars is an array of bars on the canvas that are at the same position as the click event.
+        }
+    });
+    //enable the clear button
+    $('#btnClearSearch').click(function () {
+        //clear the search terms
+        $('#iDrug').val('');
+        $('#startDate').val('2010-01-01');
+        $('#endDate').val('2010-01-31');
+        //hide the search results select list
+        hideResultsRow();
+        // if (typeof myBarChart.destroy === 'function') {  };
+        try {
+            myBarChart.clear();
+            myBarChart.destroy();
+        } catch (e) { }
+    });
+
+    //enable the build graph button
+    $('#btnBuildGraph').click(function () {
+        getSpecificItemData($('#selSpecificProducts').val());
+    });
+
+
 });
 	
 function hideResultsRow(){
@@ -72,6 +92,20 @@ function getDrugNames(drugname){
 	    }, "json" );
 }
 
+function getEventsByDate(startdate, enddate) {
+    var targurl = apirooturl + "receivedate:[" + startdate + "+TO+" + enddate + "]&count=receivedate";
+    console.log('url to get events by date:' + targurl);
+    $.get(targurl, function (data) {
+        //console.log(data);
+        if (data.error) {//this doesn't work. will need to do error checking another way, probably leveraging the xhr object which has sweet methods like 'fail', etc.
+            alert(data.error.message);
+            return;
+        }
+        drawGraph(data.results);
+    }, "json");
+}
+
+
 function getSpecificItemData(target){
 	//console.log('going after this target: ' + target);
 	var targurl = apirooturl + "patient.drug.openfda.brand_name:" + target + "&limit=50&count=patient.reaction.reactionmeddrapt.exact";
@@ -83,24 +117,51 @@ function getSpecificItemData(target){
 	    }, "json" );
 }
 
-function fixUpFDAData(incoming){
+function fixUpFDAData(incoming) {
+    var avgVal = 0;
+
+    $(incoming).each(function (key, value) {       
+        avgVal += value.count;
+    });
+    avgVal = Math.round( avgVal / $(incoming).length ); 
+
 	var retval = {
 		labels:[],
 		datasets:[
 			{
-				label:"bla",
-	            fillColor: "rgba(220,220,220,0.5)",
-	            strokeColor: "rgba(220,220,220,0.8)",
-	            highlightFill: "rgba(220,220,220,0.75)",
-	            highlightStroke: "rgba(220,220,220,1)",
+				label:"data",
+	            fillColor: "rgba(153,255,153,0.5)",
+	            strokeColor: "rgba(153,255,153,0.8)",
+	            highlightFill: "rgba(153,255,153,0.75)",
+	            highlightStroke: "rgba(153,255,153,1)",
+	            data: []
+			},
+            {
+				label:"spikes",
+				fillColor: "rgba(255,51,51,0.5)",
+				strokeColor: "rgba(255,51,51,0.8)",
+				highlightFill: "rgba(255,51,51,0.75)",
+				highlightStroke: "rgba(255,51,51,1)",
 	            data: []
 			}
 		]
-		};
-	$(incoming).each(function(key,value){
-		retval.labels.push(value.term);
-		retval.datasets[0].data.push(value.count);
-	});
+	    };
+
+	    $(incoming).each(function (key, value) {
+
+	        retval.labels.push((value.term == undefined ? value.time : value.term));
+
+	        if (((value.count / avgVal) * 100) >= (parseInt($('#spikepct').val()) + 100)) {
+	            retval.datasets[1].data.push(value.count);
+	        } else {
+	            retval.datasets[1].data.push(0);
+	        }
+
+	        if (!$('#toggleSpikes')[0].checked) {
+	            retval.datasets[0].data.push(value.count);
+	        }
+
+	    });
 	return retval;
 }
 
@@ -114,10 +175,10 @@ function drawGraph(dater){
     scaleBeginAtZero : true,
 
     //Boolean - Whether grid lines are shown across the chart
-    scaleShowGridLines : true,
+    scaleShowGridLines : false,
 
     //String - Colour of the grid lines
-    scaleGridLineColor : "rgba(0,0,0,.05)",
+    scaleGridLineColor : "rgba(0,0,0,.2)",
 
     //Number - Width of the grid lines
     scaleGridLineWidth : 1,
@@ -143,9 +204,12 @@ function drawGraph(dater){
     //String - A legend template
     legendTemplate : "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<datasets.length; i++){%><li><span style=\"background-color:<%=datasets[i].fillColor%>\"></span><%if(datasets[i].label){%><%=datasets[i].label%><%}%></li><%}%></ul>"
 
-};
-	//instantiate our chart canvas
-	var ctx = $("#chartTarg").get(0).getContext("2d");
-	myBarChart = new Chart(ctx).Bar(data,options);
-	
+    };
+
+
+
+    //setup chart
+    $("#chartTarg").attr("width", (data.labels.length * 12).toString() + "px");
+    //instantiate our chart canvas
+    myBarChart = new Chart($("#chartTarg").get(0).getContext("2d")).Bar(data, options);
 }
