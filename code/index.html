@@ -11,6 +11,7 @@
     <!-- Font AWESOME! CSS -->
     <link rel="stylesheet" href="fonts/font-awesome-4.2.0/css/font-awesome.css">
     <link rel="stylesheet" href="fonts/font-awesome-4.2.0/css/font-awesome-animation.css">
+    <link rel="stylesheet" href="css/bootstrap-datepicker.standalone.css">
 
 
     <script src="scripts/jquery-2.1.4.min.js"></script>
@@ -19,6 +20,7 @@
     <script src="scripts/chartGlobalOptions.js"></script>
     <script src="scripts/fdachallenge.js"></script>
     <script src="scripts/Dialog.js"></script>
+    <script src="scripts/bootstrap-datepicker.js"></script>
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
@@ -97,9 +99,11 @@
                     <li>
                         <label>Date Range:</label>
                         <div>
-                            <input type="text" id="startDate" name="startDate" class="form-control" value="2010-01-01" placeholder="Start Date" data-toggle="tooltip" data-placement="bottom" title="Enter a start date. (eg. YYYY-MM-DD)">
-                            <input type="text" id="endDate" name="endDate" class="form-control" value="2010-12-31" placeholder="End Date" data-toggle="tooltip" data-placement="bottom" title="Enter an end date. (eg. YYYY-MM-DD)">
-                        </div>
+                       
+                            <input type="text" id="startDate" name="startDate" data-provide="datepicker" class="datepicker" value="2010-01-01" placeholder="Start Date" data-toggle="tooltip" data-placement="bottom" title="Enter a start date. (eg. YYYY-MM-DD)" data-date-format="yyyy-mm-dd">
+                            <input type="text" id="endDate" name="endDate" data-provide="datepicker" class="datepicker" value="2010-12-31" placeholder="End Date" data-toggle="tooltip" data-placement="bottom" title="Enter an end date. (eg. YYYY-MM-DD)" data-date-format="yyyy-mm-dd">
+
+                         </div>
                     </li>
                     <li>
 
