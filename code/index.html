@@ -14,6 +14,8 @@
     <!-- Bootstrap Core CSS -->
     <!-- < link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" > -->
     <link rel="stylesheet" href="bootstrap/3.3.5/css/bootstrap.min.css">
+    <!-- <link rel="stylesheet" href="bootstrap/3.3.5/css/bootstrap-datepicker3.standalone.min.css"> -->
+    <link rel="stylesheet" href="bootstrap/3.3.5/css/bootstrap-datepicker.standalone.css">
 	
     <!-- Vis CSS 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.2.0/vis.min.css">-->
@@ -29,6 +31,8 @@
         <script src="scripts/jquery-2.1.4.min.js"></script>	
 	<!-- < script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></ script> -->
         <script src="bootstrap/3.3.5/js/bootstrap.min.js"></script>
+        <!-- <script src="bootstrap/3.3.5/js/bootstrap-datepicker.min.js"></script> -->
+        <script src="bootstrap/3.3.5/js/bootstrap-datepicker.js"></script>
 	<!---<script src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.2.0/vis.min.js"></script>--->
 	<script src="scripts/charts.js"></script>
 	<script src="scripts/chartGlobalOptions.js"></script>		
@@ -94,8 +98,8 @@
 					<div class="row">
 	                    <label class="col-lg-3 control-label">Date Range:</label>
 	                    <div class="col-lg-8">
-	                        <input type="text" id="startDate" name="startDate" class="form-control" value="2010-01-01" placeholder="Start Date" data-toggle="tooltip" data-placement="bottom" title="Enter a start date. (eg. YYYY-MM-DD)">
-	                        <input type="text" id="endDate" name="endDate" class="form-control" value="2010-01-31" placeholder="End Date" data-toggle="tooltip" data-placement="bottom" title="Enter an end date. (eg. YYYY-MM-DD)">
+	                        <input type="text" id="startDate" name="startDate" data-provide="datepicker" class="datepicker" value="2010-01-01" placeholder="Start Date" data-toggle="tooltip" data-placement="bottom" title="Enter a start date. (eg. YYYY-MM-DD)" data-date-format="yyyy-mm-dd">
+	                        <input type="text" id="endDate" name="endDate" data-provide="datepicker" class="datepicker" value="2010-01-31" placeholder="End Date" data-toggle="tooltip" data-placement="bottom" title="Enter an end date. (eg. YYYY-MM-DD)" data-date-format="yyyy-mm-dd">
 	                    </div>						
 					</div>
 					<div class="row">
