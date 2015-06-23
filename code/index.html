@@ -1,35 +1,23 @@
-﻿<!DOCTYPE html>
-<html lang="en">
-
+<!DOCTYPE html>
+<html>
 <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="">
-    <meta name="author" content="">
 
-    <title>Triple I FDA Challenge</title>
+    <title>Triple-i Researcher</title>
 
-    <!-- Bootstrap Core CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
-    <link rel="stylesheet" href="css/bootstrap-dialog.min.css">
-	
-    <!-- Vis CSS 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.2.0/vis.min.css">-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <link href="css/theme.css" rel="stylesheet" media="screen">
+    <link href="css/fdachallenge.css" rel="stylesheet" media="screen">
     <!-- Font AWESOME! CSS -->
-	<link rel="stylesheet" href="fonts/font-awesome-4.2.0/css/font-awesome.css">
+    <link rel="stylesheet" href="fonts/font-awesome-4.2.0/css/font-awesome.css">
     <link rel="stylesheet" href="fonts/font-awesome-4.2.0/css/font-awesome-animation.css">
-	
-    <!-- Custom CSS -->
-    <link href="css/fdachallenge.css" rel="stylesheet">
-	
-	<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>	
-	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
-	<!---<script src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.2.0/vis.min.js"></script>--->
-	<script src="scripts/charts.js"></script>
-	<script src="scripts/chartGlobalOptions.js"></script>		
-	<script src="scripts/fdachallenge.js"></script>
+
+
+    <script src="scripts/jquery-2.1.4.min.js"></script>
+    <script src="scripts/bootstrap.min.js"></script>
+    <script src="scripts/charts.js"></script>
+    <script src="scripts/chartGlobalOptions.js"></script>
+    <script src="scripts/fdachallenge.js"></script>
     <script src="scripts/Dialog.js"></script>
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -37,107 +25,166 @@
         <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
         <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
     <![endif]-->
+    <!--- load datatables resources --->
+    <script src="scripts/jquery.dataTables.min.js"></script>
+    <script src="scripts/datatables/TableTools.js"></script>
+    <script src="scripts/datatables/dataTables.bootstrap.js"></script>
 
 </head>
 
 <body>
-    <div id="wrapper">
-        <div id="sidebar-wrapper">
-            <form class="form-vertical" role="form">
-                <div class="form-group">
-                    <div class="row form-group">
-                        <label class="col-lg-4 control-label">Generic Name:</label>
-                        <div class="col-lg-8">
+    <section class="container">
+
+        
+           <div class="panel">
+            <div class="panel-heading">Triple-i Researcher for OpenFDA by Information Innovators Inc. (Triple-i) ...
+</div>
+				<div class="panel-body">
+
+					<div id="carousel-example-generic" class="carousel slide bs-docs-carousel-example">
+						<ol class="carousel-indicators">
+							<li data-target="#carousel-example-generic" data-slide-to="0" class="active"></li>
+							<li data-target="#carousel-example-generic" data-slide-to="1" class=""></li>
+							<li data-target="#carousel-example-generic" data-slide-to="2" class=""></li>
+						</ol>
+						<div class="carousel-inner">
+							<div class="item">
+							   <img class="img-responsive"  src="images/image01.png" alt="" >
+								<div class="carousel-caption">
+									<h3>Triple-i Researcher </h3>
+									<p>for OpenFDA by Information Innovators Inc. (Triple-i)</p>
+								</div>
+							</div>
+							<div class="item active">
+                                <img class="img-responsive" src="images/image02.png" alt="">
+							</div>
+							<div class="item">
+                                <img class="img-responsive" src="images/image03.png" alt="">
+							</div>
+						</div>
+						<a class="left carousel-control" href="#carousel-example-generic" data-slide="prev">
+							<span class="icon-prev"></span>
+						</a>
+						<a class="right carousel-control" href="#carousel-example-generic" data-slide="next">
+							<span class="icon-next"></span>
+						</a>
+					</div>
+				</div>
+        </div>
+        <div class="col-xs-6 col-sm-3 sidebar-offcanvas" id="sidebar" role="navigation">
+            <div class="well sidebar-nav">
+                <ul class="nav">
+                    <li>
+                        <label >Generic Name:</label>
+                        <div >
                             <input type="text" id="iDrug" name="iDrug" class="form-control" placeholder="ASPIRIN" value="ASPIRIN" data-toggle="tooltip" data-placement="bottom" title="Enter a generic drug name. e.g. TYLENOL">
                         </div>
-                    </div>
-                    <div class="row form-group">
-                        <label class="col-lg-4 control-label">Substance Name:</label>
-                        <div class="col-lg-8">
+                    </li>
+                    <li>
+                        <label >Substance Name:</label>
+                        <div>
                             <input type="text" id="subname" name="subname" class="form-control" placeholder="ACETAMINOPHEN" data-toggle="tooltip" data-placement="bottom" title="Enter a substance name. e.g. ACETAMINOPHEN">
                         </div>
-                    </div>
-                    <div class="row form-group">
-                        <label class="col-lg-4 control-label">Reaction:</label>
-                        <div class="col-lg-8">
+                    </li>
+                    <li>
+                        <label >Reaction:</label>
+                        <div >
                             <select class="form-control" name="selreaction" id="selreaction">
                                 <option value="">(ALL)</option>
                             </select>
                         </div>
-                    </div>
-                    <div class="row form-group">
-                        <label class="col-lg-4 control-label">Date Range:</label>
-                        <div class="col-lg-8">
+                    </li>
+                    <li>
+                        <label>Date Range:</label>
+                        <div>
                             <input type="text" id="startDate" name="startDate" class="form-control" value="2010-01-01" placeholder="Start Date" data-toggle="tooltip" data-placement="bottom" title="Enter a start date. (eg. YYYY-MM-DD)">
                             <input type="text" id="endDate" name="endDate" class="form-control" value="2010-12-31" placeholder="End Date" data-toggle="tooltip" data-placement="bottom" title="Enter an end date. (eg. YYYY-MM-DD)">
                         </div>
-                    </div>
-					<div class="row form-group">
-	                    <label class="col-lg-8 control-label">Data Spike Threshold Percent:</label>
-	                    <div class="col-lg-3">
-	                       <input type="text" id="spikepct" name="spikepct" class="form-control" value="25" placeholder="25" data-toggle="tooltip" data-placement="bottom" title="Percentage above average that identifies a spike.">
-	                    </div>						
-					</div>
-					<div class="row  form-group">
-	                    <label class="col-lg-8 control-label">Only show spikes?:</label>
-	                    <div class="col-lg-4">
-	                       <input type="checkbox"  id="toggleSpikes" name="toggleSpikes" class="form-control"  >
-	                    </div>						
-					</div>
-                </div>
-                <div class="form-group">
-                    <div class="row">
-                    	<div class="col-lg-4 col-lg-offset-2">
-	                        <button type="button" id="btnClearSearch" class="btn btn-default btn-label-left">
-	                            <span><i class="fa fa-eraser"></i></span>
-	                            Clear
-	                        </button>
-						</div>
-	                    <div class="col-lg-6">
-	                        <button type="button" id="btnApplySearch" class="btn btn-primary btn-label-left">
-	                            <span><i class="fa fa-rocket"></i></span>
-	                            Apply
-	                        </button>
-	                    </div>						
-                    </div>
-                </div>
-				<hr>
-				<div class="form-group">
-					<div class="row" id="dResultsRow">
-						<div >
-							<label class="col-lg-4">Select Specific Product</label>
-							<div class="col-lg-8">
-								<select class="form-control" id="selSpecificProducts" name="selSpecificProducts" size="1">
-									<option value=""></option>
-								</select>
-							</div>
-						</div>
-						<div>
-							<div class="col-lg-4 col-lg-offset-4">
-	                        <button type="button" id="btnBuildGraph" class="btn btn-primary btn-label-left">
-	                            <span><i class="fa fa-bar-chart"></i></span>
-	                            Build Chart
-	                        </button>
-							</div>
-						</div>
-					</div>
-				</div>
-			</form>
-        </div>
-        <div id="page-content-wrapper">    
-            <h2 id="charttitle" name="charttitle"></h2>  
-            <div class="container-fluid">                  
-                <canvas id="chartTarg"></canvas>                    
+                    </li>
+                    <li>
+
+                        <label >Data Spike Threshold Percent:</label>
+                        <div >
+                            <input type="text" id="spikepct" name="spikepct" class="form-control" value="25" placeholder="25" data-toggle="tooltip" data-placement="bottom" title="Percentage above average that identifies a spike.">
+                        </div>						
+
+
+                    </li>
+                    <li>
+
+                        <div>
+                            <label>Only show spikes?:</label>
+                            <input type="checkbox" id="toggleSpikes" name="toggleSpikes" class="fa-checkbox">
+                        </div>						
+
+                    </li>
+                    <li>
+                        <button type="button" id="btnClearSearch" class="btn btn-default btn-label-left">
+                            <span><i class="fa fa-eraser"></i></span>
+                            Clear
+                        </button>
+                        <button type="button" id="btnApplySearch" class="btn btn-primary btn-label-left">
+                            <span><i class="fa fa-rocket"></i></span>
+                            Apply
+                        </button>
+                    </li>
+                </ul>
             </div>
         </div>
-    </div>
+        <div class="col-lg-6">
+            <h3 id="charttitle" name="charttitle"></h3>
+            <div class="panel-body" id="chartdiv" style="overflow-x:scroll; height:675px; width:800px;">
 
+                <canvas id="chartTarg"></canvas>
 
+            </div>
+            <div class="panel panel-default" id="defaultdiv">
+                <!--//  <div class="panel-heading">Content formating</div>-->
+                <div class="panel-body">
+                    <hr />
 
+                    <blockquote>
+                        Research is to see what everybody else has seen, and to think what nobody else has thought.
+                        <small>   Albert Szent-Gyorgyi</small>
+                    </blockquote>
 
+                    <hr />
+                    <p class="lead"><b>Triple-i Researcher</b></p>
+                    <!--//  <p>This is an <b>ordinary paragraph</b> that is <i>long enough</i> to wrap to <u>multiple lines</u> so that you can see how the line spacing looks.</p>-->
+                    <b>Adverse drug event reports since 2004</b></p>
+
+                    This is the openFDA API endpoint for adverse drug events. An adverse event is submitted to the FDA to report any undesirable experience associated with the use of a drug, including serious drug side effects, product use errors, product quality problems, and therapeutic failures.
+                                        Reporting of adverse events by healthcare professionals and consumers is voluntary in the United States. Increases in the total number of adverse events are likely caused by improved reporting. News, enforcement actions, and other phenomena can also spur reporting.
+
+                    <div class="row">
+                        <hr>
+                        <address class="col-lg-6">
+                            <strong>Information Innovators Inc.,</strong><br>
+                         7400 Fullerton Road, Suite 210, <br>
+                        Springfield, VA 22153<br>
+                            <abbr title="Phone">P: 703.635.7088,</abbr>
+                            contactus@iiinfo.com
+                        </address>
+                        <address class="col-lg-6">
+                            <strong>Full Name</strong><br>
+                            <a href="mailto:#">contactus@iiinfo.com</a>
+                        </address>
+                    </div>
+
+                    
+                    <pre>
+                        <img src="images/Newlogostandard_web_jpg.jpg"  width="440" height="105" alt="Alternate Text" />
+</pre>
+                </div>
+            </div>
+        </div>
+        
+		
+		
+    </section>
 
     <!-- Modal -->
-    <div id="tier2modal" class="modal fade" role="dialog" >
+    <div id="tier2modal" class="modal fade" role="dialog">
         <div class="modal-dialog">
             <!-- Modal content-->
             <div class="modal-content modal-admin">
@@ -176,6 +223,18 @@
                                         </div>
 
                                         <div class="form-group">
+                                            <label for="WEIGHT" class="control-label">WEIGHT</label>
+                                            <input name="ChartType" id="WEIGHT" type="radio" class="fa" value="patient.patientweight" />
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="DRUGROLE" class="control-label">DRUG ROLE</label>
+                                            <input name="ChartType" id="DRUGROLE" type="radio" class="fa" value="patient.drug.drugcharacterization" />
+                                        </div>
+
+
+
+                                        <div class="form-group">
                                             <button type="button" id="btnApplyTier2" class="btn btn-primary btn-label-left">
                                                 <span><i class="fa fa-rocket"></i></span>
                                                 Apply
@@ -184,18 +243,18 @@
 
                                     </div>
                                     <div class="col-lg-10" style="overflow-x:scroll;">
-                                        
-                                            <canvas id="tier2chart" width="600" height="600"</canvas>
-                                        
+
+                                        <canvas id="tier2chart" width="600" height="600"</canvas>
+
                                     </div>
                                 </div>
 
                             </div>
-
-
                         </div>
                         <div role="tabpanel" class="tab-pane" id="rawdata">
+                            <div class="container-fluid" id="tblcontainer" style="overflow-x:scroll;">
 
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -206,7 +265,6 @@
 
         </div>
     </div>
-
 
 
 </body>

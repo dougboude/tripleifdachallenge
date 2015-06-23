@@ -2,17 +2,44 @@ var apikey = "z0wwT73I3DtNL8cxr3VUc7shQsESx0MPIyuTYQv9";
 var apirooturl = "https://api.fda.gov/drug/event.json?api_key=" + apikey + "&search=";
 var myBarChart = ""; //setting a global variable so we can access our chart from any function
 var activeBars = {};
-var teir2chart = "";
+var tier2chart = "";
+var keyWL = ["safetyreportid", "reactionmeddrapt", "patientweight", "drugcharacterization", "medicinalproduct",
+    "drugdosagetext", "manufacturer_name", "brand_name", "route", "pharm_class_epc", "generic_name", "patientonsetage", "patientsex"];
+var keyWLDataColumns = [    
+    { "title": "safetyreportid"},
+    { "title": "reactionmeddrapt" },
+    { "title": "patientweight" },
+    { "title": "drugcharacterization" },
+    { "title": "medicinalproduct" },
+    { "title": "drugdosagetext" },
+    { "title": "manufacturer_name" },
+    { "title": "brand_name" },
+    { "title": "route" },
+    { "title": "pharm_class_epc" },
+    { "title": "generic_name" },
+    { "title": "patientonsetage" },
+    { "title": "patientsex" }
+];
 
-$(document).ready(function () {//on page load, set up some crap
+$(document).ready(function () {
+    //on page load
     //instantiate tool tips
     $("[data-toggle='tooltip']").tooltip();
 
     //hide results row
     hideResultsRow();
 
+
+    $('#chartdiv').hide();
+
     //enable the search button
     $('#btnApplySearch').click(function () {
+
+
+        $('#defaultdiv').hide();
+        $('#chartdiv').show();
+        
+
         try {
             myBarChart.clear();
             myBarChart.destroy();
@@ -32,8 +59,8 @@ $(document).ready(function () {//on page load, set up some crap
     $('#btnApplyTier2').click(function () {
 
         try {
-            teir2chart.clear();
-            teir2chart.destroy();
+            tier2chart.clear();
+            tier2chart.destroy();
         } catch (e) { }
 
         getTier2Data($('#selectedDate').val(), $('#iDrug').val(), $('#selreaction').val(), $('#subname').val());
@@ -89,16 +116,15 @@ $(document).ready(function () {//on page load, set up some crap
 
 
     $("#tier2modal").on('shown.bs.modal', function () {
+
         $("#tier2modalhead").text(activeBars[0].toolTipLabel);
         $("#selectedDate").val(activeBars[0].label);
+
+        getTier2DataRaw($('#selectedDate').val(), $('#iDrug').val(), $('#selreaction').val(), $('#subname').val());
+
+       
+       
     });
-
-
-
-
-
-
-
 
 });
 	
@@ -122,7 +148,6 @@ function popResultsSelect(products){
          	.text(value.term));
 	});
 }
-
 
 function populateReactionSelect(reactions) {
 
@@ -212,32 +237,10 @@ function getEventsByDate(startdate, enddate, drugname,reactionname,substancename
     console.log(targurl + "&count=receivedate");
 }
 
-
-
 function getTier2Data(selectedDate, drugname, reactionname, substancename) {
 
-    var sDate = "";
-    var drugs = "";
-    var reaction = "";
-    var substance = "";
     var charttype = $('input[name=ChartType]:checked').val();
-
-    sDate = FDADate(selectedDate);
-
-
-    if (!drugname.match(/^$/)) {
-        drugs = "(generic_name:" + drugname + ")+AND+";
-    }
-
-    if (!substancename.match(/^$/)) {
-        substance = "(substance_name:" + substancename + ")+AND+";
-    }
-
-    if (reactionname != null && !reactionname.match(/^$/)) {
-        reaction = "(patient.reaction.reactionmeddrapt:" + reactionname + ")+AND+";
-    }
-
-    var targurl = apirooturl + drugs + reaction + substance + "receivedate:"+sDate;
+    var qry = buildtier2Query(selectedDate, drugname, reactionname, substancename);
 
     $.ajaxSetup({
         error: function (x, e) {
@@ -256,12 +259,61 @@ function getTier2Data(selectedDate, drugname, reactionname, substancename) {
         }
     });
 
-    $.get(targurl + "&count=" + charttype, function (data) { drawTier2Graph(data.results, $('input[name=ChartType]:checked').attr("id")); }, "json");
+    $.get(qry + "&count=" + charttype, function (data) { drawTier2Graph(data.results, $('input[name=ChartType]:checked').attr("id")); }, "json");
 
-    console.log(targurl + "&count=" + charttype);
+    console.log(qry + "&count=" + charttype);
+
 }
 
+function getTier2DataRaw(selectedDate, drugname, reactionname, substancename) {
 
+    var qry = buildtier2Query(selectedDate, drugname, reactionname, substancename);
+
+    $.ajaxSetup({
+        error: function (x, e) {
+
+            if (x.status == 0) {
+                AlertDialog('Error!', ' Check Your Network.');
+            }
+            else if (x.status == 404) {
+                AlertDialog('Error!', 'No Data Found.  Please refine your search parameters and try again.');
+
+            } else if (x.status == 500) {
+                AlertDialog('Error!', 'Internel Server Error.');
+            } else {
+                AlertDialog('Error!', 'Unknow Error.\n' + x.responseText);
+            }
+        }
+    });
+
+    $.get(qry + "&limit=100", function (data) { createDTSDataSet(data.results); }, "json");
+
+    console.log(qry + "&limit=100");
+}
+
+function buildtier2Query(selectedDate, drugname, reactionname, substancename){
+
+    var sDate = "";
+    var drugs = "";
+    var reaction = "";
+    var substance = "";
+
+    sDate = FDADate(selectedDate);
+
+    if (!drugname.match(/^$/)) {
+        drugs = "(generic_name:" + drugname + ")+AND+";
+    }
+
+    if (!substancename.match(/^$/)) {
+        substance = "(substance_name:" + substancename + ")+AND+";
+    }
+
+    if (reactionname != null && !reactionname.match(/^$/)) {
+        reaction = "(patient.reaction.reactionmeddrapt:" + reactionname + ")+AND+";
+    }
+
+    return apirooturl + drugs + reaction + substance + "receivedate:" + sDate;
+}
 
 function getSpecificItemData(target){
 	//console.log('going after this target: ' + target);
@@ -308,7 +360,7 @@ function fixUpFDAData(incoming) {
 	    $(incoming).each(function (key, value) {
 
 	        retval.labels.push((value.term == undefined ? formatDate(value.time) : value.term));
-	        retval.toolTipLabels.push((value.term == undefined ? (value.count + " reactions on " + formatDate(value.time) + " ( " + Math.round((value.count / avgVal) * 100).toString() + "% of the average " + avgVal.toString() + " ) ") : value.term));
+	        retval.toolTipLabels.push((value.term == undefined ? (value.count + " reactions on " + formatDate(value.time) + " ( " + Math.round((value.count / avgVal) * 100).toString() + "% of the average " + avgVal.toString() + " for the period " + formatDate($('#startDate').val()) + " TO " + formatDate($('#endDate').val()) + ") ") : value.term));
 	        
 	        if( parseInt($('#spikepct').val()) > 0  ){
 	            if (((value.count / avgVal) * 100) >= (parseInt($('#spikepct').val()) + 100) ) {
@@ -328,8 +380,6 @@ function fixUpFDAData(incoming) {
 	return retval;
 }
 
-
-
 function fixUpFDADataTier2(incoming,dsType) {
    
     var retval = {
@@ -348,11 +398,23 @@ function fixUpFDADataTier2(incoming,dsType) {
     };
 
     $(incoming).each(function (key, value) {
-
+      
         if (dsType == "SEX") {
 
             retval.labels.push(value.term.toString().replace("0","Unknown").replace("1","Male").replace("2","Female") );
             retval.toolTipLabels.push(value.term.toString().replace("0", "Unknown").replace("1", "Male").replace("2", "Female"));
+            retval.datasets[0].data.push(value.count);
+
+        } else if (dsType == "WEIGHT") {
+
+            retval.labels.push(Math.round( parseFloat( value.term) * 2.20462  ));
+            retval.toolTipLabels.push(Math.round(parseFloat(value.term) * 2.20462));
+            retval.datasets[0].data.push(value.count);
+
+        } else if (dsType == "DRUGROLE") {
+
+            retval.labels.push(value.term.toString().replace("1", "Suspect drug").replace("2", "Concomitant drug").replace("3", "Interacting drug"));
+            retval.toolTipLabels.push(value.term.toString().replace("1", "Suspect drug").replace("2", "Concomitant drug").replace("3", "Interacting drug"));
             retval.datasets[0].data.push(value.count);
 
         } else {
@@ -363,25 +425,23 @@ function fixUpFDADataTier2(incoming,dsType) {
 
         }
 
-
-
     });
 
     return retval;
 }
 
-
 function formatDate(dval) {
-    var day = dval.substr(6,2);
-    var month = dval.substr(4, 2);
-    var year = dval.substr(0, 4);
 
-    return month + "-" + day + "-" + year;
+
+    var day = dval.replace(/-/ig, "").substr(6, 2).toString();
+    var month = dval.replace(/-/ig, "").substr(4, 2).toString();
+    var year = dval.replace(/-/ig, "").substr(0, 4).toString();
+
+
+    return month.toString() + "-" + day.toString() + "-" + year.toString();
 }
 
 function FDADate(dval) {
-
-
 
     var day = dval.split("-")[1];
     var month = dval.split("-")[0];
@@ -392,8 +452,7 @@ function FDADate(dval) {
 
 function drawGraph(dater){
 	var data = fixUpFDAData(dater);
-
-
+    
 	//console.log(data);
 	var options = {
 	    //Boolean - Whether the scale should start at zero, or an order of magnitude down from the lowest value
@@ -404,6 +463,18 @@ function drawGraph(dater){
 
 	    //String - Colour of the grid lines
 	    scaleGridLineColor: "rgba(0,0,0,.2)",
+
+	    // String - Colour of the scale line
+	    scaleLineColor: "rgba(255,255,255,1.0)",
+
+	    // String - Scale label font colour
+	    scaleFontColor: "#fff",
+
+	    // Number - Scale label font size in pixels
+	    scaleFontSize: 14,
+
+	    // String - Scale label font weight style
+	    scaleFontStyle: "normal",
 
 	    //Number - Width of the grid lines
 	    scaleGridLineWidth: 1,
@@ -433,7 +504,7 @@ function drawGraph(dater){
 
     //setup chart
 	$("#chartTarg").css("width", (parseInt(data.labels.length) * 20).toString() + "px");
-	$("#chartTarg").css("height","800px");
+	$("#chartTarg").css("height","600px");
     //instantiate our chart canvas
 	myBarChart = new Chart($("#chartTarg").get(0).getContext("2d")).Bar(data, options);
 }
@@ -452,6 +523,19 @@ function drawTier2Graph(dater,dsType) {
 
         //String - Colour of the grid lines
         scaleGridLineColor: "rgba(0,0,0,.2)",
+
+        // String - Colour of the scale line
+        scaleLineColor: "rgba(255,255,255,1.0)",
+
+
+        // String - Scale label font colour
+        scaleFontColor: "#fff",
+
+        // Number - Scale label font size in pixels
+        scaleFontSize: 14,
+
+        // String - Scale label font weight style
+        scaleFontStyle: "normal",
 
         //Number - Width of the grid lines
         scaleGridLineWidth: 1,
@@ -483,5 +567,93 @@ function drawTier2Graph(dater,dsType) {
     $("#tier2chart").css("width", (parseInt(data.labels.length) * 20).toString() + "px");
     $("#tier2chart").css("height", "600px");
     //instantiate our chart canvas
-    teir2chart = new Chart($("#tier2chart").get(0).getContext("2d")).Bar(data, options);
+    tier2chart = new Chart($("#tier2chart").get(0).getContext("2d")).Bar(data, options);
+}
+
+function createDTSDataSet(dset) {
+
+
+    //wordlist of properties on the data record to retrieve.  Must be in the iorder that they appear on the record
+
+
+    var retDset = [];
+    
+    $(dset).each(function (k, v) {        
+        var resM = listAllProperties(v);
+        var retRow = Array(keyWL.length).join(".").split(".");
+        $(resM).each(function (Memkey,memval) { 
+            if (v[memval] != null && v[memval].toString() == "[object Object]") {
+                var subresM = listAllProperties(v[memval]);
+                $(subresM).each(function (mk, mv) {
+                    if (keyWL.indexOf(mv) > -1) {
+                        retRow[keyWL.indexOf(mv)] = (v[memval][mv].length < 1) ? " " : v[memval][mv] ;
+                    }
+                });
+            }else if (keyWL.indexOf(memval)>-1) {
+                retRow[keyWL.indexOf(memval)] = (v[memval].length < 1) ?  " " : v[memval] ; 
+            }
+        });
+        retDset.push(retRow);          
+    });
+
+    console.log(retDset);
+
+
+    //$("#tblcontainer").html('done. ');
+
+    //var tableProgress = $("<table id='tblrawdata'><tr><th></th></tr><tr><td></td></tr></table>");
+
+    //$("#tblcontainer").empty().append(tableProgress);
+
+
+    //$('#tblrawdata').dataTable({
+    //    "aaSorting": [[0, "asc"]],
+    //    "sDom": "<'box-content'<'col-sm-6'f><'col-sm-6 text-right dtlength'l><'clearfix'>>rt<'box-content'<'col-sm-6'i><'col-sm-6 text-right'p><'clearfix'>>",
+    //    "sPaginationType": "bootstrap",
+    //    "oLanguage": {
+    //        "sSearch": "Type search phrase...",
+    //        "sZeroRecords": "There are no records that match your search criteria",
+    //        "sLengthMenu": '_MENU_'
+    //    },
+    //    "aoColumnDefs": [
+    //        { 'bSortable': false, 'aTargets': [6] }
+    //    ],
+    //    "fnInitComplete": function () {
+    //        $('.dtlength label').html("Number of Records to Display: " + $('.dtlength label').html());
+    //    }
+    //});
+
+    
+    //$('#tblrawdata').dataTable({
+    //    "columns": keyWLDataColumns,
+    //    "data": retDset,
+       
+    //});
+
+
+   
+
+    $('#tblcontainer').html('<table cellpadding="0" cellspacing="0" border="0" class="table table-striped table-bordered" id="example" ></table>');
+
+    $('#example').dataTable({
+        "data": retDset,
+        "columns": keyWLDataColumns
+    });
+    
+
+
+
+}
+
+function listAllProperties(o) {
+
+    var objectToInspect;
+    var result = [];
+
+    for (objectToInspect = o; objectToInspect !== null; objectToInspect = Object.getPrototypeOf(objectToInspect)) {
+        result = result.concat(Object.getOwnPropertyNames(objectToInspect));
+    }
+
+    return result;
+
 }
