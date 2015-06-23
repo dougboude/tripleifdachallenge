@@ -48,11 +48,10 @@ $(document).ready(function () {
 
         if (!$('#startDate').val().match(/^$/) && !$('#endDate').val().match(/^$/)) {
             getEventsByDate($('#startDate').val(), $('#endDate').val(), $('#iDrug').val(), $('#selreaction').val(), $('#subname').val());
-        }else {
-            if (!$('#iDrug').val().match(/^$/)) {
-                getDrugNames($('#iDrug').val());
-            }
+        } else {
+            AlertDialog("Required Field", "Please supply a start and end date for your search. :-)");
         }
+
     });
 
     //enable the search button
@@ -102,6 +101,8 @@ $(document).ready(function () {
             myBarChart.clear();
             myBarChart.destroy();
         } catch (e) { }
+
+        $("#charttitle").text("");
     });
 
     //enable the build graph button
@@ -504,7 +505,7 @@ function drawGraph(dater){
 
     //setup chart
 	$("#chartTarg").css("width", (parseInt(data.labels.length) * 20).toString() + "px");
-	$("#chartTarg").css("height","600px");
+	$("#chartTarg").css("height","540px");
     //instantiate our chart canvas
 	myBarChart = new Chart($("#chartTarg").get(0).getContext("2d")).Bar(data, options);
 }
