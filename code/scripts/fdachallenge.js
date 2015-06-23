@@ -3,6 +3,24 @@ apirooturl = "https://api.fda.gov/drug/event.json?api_key=" + apikey + "&search=
 myBarChart = ""; //setting a global variable so we can access our chart from any function
 
 $(document).ready(function(){//on page load, set up some crap
+    //set up the datatable, with a customized header section
+    $('#datatable-1').dataTable({
+        "aaSorting": [[0, "asc"]],
+        "sDom": "<'box-content'<'col-sm-6'f><'col-sm-6 text-right dtlength'l><'clearfix'>>rt<'box-content'<'col-sm-6'i><'col-sm-6 text-right'p><'clearfix'>>",
+        "sPaginationType": "bootstrap",
+        "oLanguage": {
+            "sSearch": "Type search phrase...",
+            "sZeroRecords": "There are no records that match your search criteria",
+            "sLengthMenu": '_MENU_'
+        },
+        "aoColumnDefs": [
+            { 'bSortable': false, 'aTargets': [6] }
+        ],
+        "fnInitComplete": function () {
+            $('.dtlength label').html("Number of Records to Display: " + $('.dtlength label').html());
+        }
+    });
+	
 	//instantiate tool tips
 	$("[data-toggle='tooltip']").tooltip();
 	
