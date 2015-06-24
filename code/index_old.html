@@ -1,0 +1,231 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Triple I FDA Challenge</title>
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/bootstrap-dialog.min.css">
+	
+    <!-- Vis CSS 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.2.0/vis.min.css">-->
+
+    <!-- Font AWESOME! CSS -->
+	<link rel="stylesheet" href="fonts/font-awesome-4.2.0/css/font-awesome.css">
+    <link rel="stylesheet" href="fonts/font-awesome-4.2.0/css/font-awesome-animation.css">
+	
+    <!-- Custom CSS -->
+    <link href="css/fdachallenge.css" rel="stylesheet">
+    <link href="css/theme.css" rel="stylesheet">
+    
+
+	<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>	
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+	<!---<script src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.2.0/vis.min.js"></script>--->
+	<script src="scripts/charts.js"></script>
+	<script src="scripts/chartGlobalOptions.js"></script>		
+	<script src="scripts/fdachallenge.js"></script>
+    <script src="scripts/Dialog.js"></script>
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!--- load datatables resources --->
+    <script src="https://cdn.datatables.net/1.10.7/js/jquery.dataTables.min.js"></script>
+    <script src="scripts/datatables/TableTools.js"></script>
+    <script src="scripts/datatables/dataTables.bootstrap.js"></script>
+</head>
+
+<body>
+    <div id="wrapper">
+        <div id="sidebar-wrapper">
+            <form class="form-vertical" role="form">
+                <div class="form-group">
+                    <div class="row form-group">
+                        <label class="col-lg-4 control-label">Generic Name:</label>
+                        <div class="col-lg-8">
+                            <input type="text" id="iDrug" name="iDrug" class="form-control" placeholder="ASPIRIN" value="ASPIRIN" data-toggle="tooltip" data-placement="bottom" title="Enter a generic drug name. e.g. TYLENOL">
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <label class="col-lg-4 control-label">Substance Name:</label>
+                        <div class="col-lg-8">
+                            <input type="text" id="subname" name="subname" class="form-control" placeholder="ACETAMINOPHEN" data-toggle="tooltip" data-placement="bottom" title="Enter a substance name. e.g. ACETAMINOPHEN">
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <label class="col-lg-4 control-label">Reaction:</label>
+                        <div class="col-lg-8">
+                            <select class="form-control" name="selreaction" id="selreaction">
+                                <option value="">(ALL)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <label class="col-lg-4 control-label">Date Range:</label>
+                        <div class="col-lg-8">
+                            <input type="text" id="startDate" name="startDate" class="form-control" value="2010-01-01" placeholder="Start Date" data-toggle="tooltip" data-placement="bottom" title="Enter a start date. (eg. YYYY-MM-DD)">
+                            <input type="text" id="endDate" name="endDate" class="form-control" value="2010-12-31" placeholder="End Date" data-toggle="tooltip" data-placement="bottom" title="Enter an end date. (eg. YYYY-MM-DD)">
+                        </div>
+                    </div>
+					<div class="row form-group">
+	                    <label class="col-lg-8 control-label">Data Spike Threshold Percent:</label>
+	                    <div class="col-lg-3">
+	                       <input type="text" id="spikepct" name="spikepct" class="form-control" value="25" placeholder="25" data-toggle="tooltip" data-placement="bottom" title="Percentage above average that identifies a spike.">
+	                    </div>						
+					</div>
+					<div class="row  form-group">
+	                    <label class="col-lg-8 control-label">Only show spikes?:</label>
+	                    <div class="col-lg-4">
+	                       <input type="checkbox"  id="toggleSpikes" name="toggleSpikes" class="form-control"  >
+	                    </div>						
+					</div>
+                </div>
+                <div class="form-group">
+                    <div class="row">
+                    	<div class="col-lg-4 col-lg-offset-2">
+	                        <button type="button" id="btnClearSearch" class="btn btn-default btn-label-left">
+	                            <span><i class="fa fa-eraser"></i></span>
+	                            Clear
+	                        </button>
+						</div>
+	                    <div class="col-lg-6">
+	                        <button type="button" id="btnApplySearch" class="btn btn-primary btn-label-left">
+	                            <span><i class="fa fa-rocket"></i></span>
+	                            Apply
+	                        </button>
+	                    </div>						
+                    </div>
+                </div>
+				<hr>
+				<div class="form-group">
+					<div class="row" id="dResultsRow">
+						<div >
+							<label class="col-lg-4">Select Specific Product</label>
+							<div class="col-lg-8">
+								<select class="form-control" id="selSpecificProducts" name="selSpecificProducts" size="1">
+									<option value=""></option>
+								</select>
+							</div>
+						</div>
+						<div>
+							<div class="col-lg-4 col-lg-offset-4">
+	                        <button type="button" id="btnBuildGraph" class="btn btn-primary btn-label-left">
+	                            <span><i class="fa fa-bar-chart"></i></span>
+	                            Build Chart
+	                        </button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</form>
+        </div>
+        <div id="page-content-wrapper">    
+            <h2 id="charttitle" name="charttitle"></h2>  
+            <div class="container-fluid">                  
+                <canvas id="chartTarg"></canvas>                    
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+    <!-- Modal -->
+    <div id="tier2modal" class="modal fade" role="dialog" >
+        <div class="modal-dialog">
+            <!-- Modal content-->
+            <div class="modal-content modal-admin">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title" id="tier2modalhead"></h4>
+                    <input type="hidden" id="selectedDate" />
+                </div>
+                <div class="modal-body">
+                    <!-- Nav tabs -->
+                    <ul class="nav nav-tabs" role="tablist">
+                        <li role="presentation" class="active"><a href="#chart" aria-controls="chart" role="tab" data-toggle="tab">Chart</a></li>
+                        <li role="presentation"><a href="#rawdata" aria-controls="rawdata" role="tab" data-toggle="tab">Raw Data</a></li>
+                    </ul>
+                    <!-- Tab panes -->
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane active" id="chart">
+                            <div class="container-fluid">
+
+
+                                <div class="row">
+                                    <div class="col-lg-2 bg-info">
+                                        <br />
+                                        <div class="form-group">
+                                            <label for="SEX" class="control-label">SEX</label>
+                                            <input name="ChartType" id="SEX" type="radio" class="fa" value="patient.patientsex" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="AGE" class="control-label">AGE</label>
+                                            <input name="ChartType" id="AGE" type="radio" class="fa" value="patient.patientonsetage" />
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="DELIVERY" class="control-label">DELIVERY</label>
+                                            <input name="ChartType" id="DELIVERY" type="radio" class="fa" value="patient.drug.openfda.route.exact" />
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="WEIGHT" class="control-label">WEIGHT</label>
+                                            <input name="ChartType" id="WEIGHT" type="radio" class="fa" value="patient.patientweight" />
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="DRUGROLE" class="control-label">DRUG ROLE</label>
+                                            <input name="ChartType" id="DRUGROLE" type="radio" class="fa" value="patient.drug.drugcharacterization" />
+                                        </div>
+
+                                        
+
+                                        <div class="form-group">
+                                            <button type="button" id="btnApplyTier2" class="btn btn-primary btn-label-left">
+                                                <span><i class="fa fa-rocket"></i></span>
+                                                Apply
+                                            </button>
+                                        </div>
+
+                                    </div>
+                                    <div class="col-lg-10" style="overflow-x:scroll;">
+                                        
+                                            <canvas id="tier2chart" width="600" height="600"</canvas>
+                                        
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                        <div role="tabpanel" class="tab-pane" id="rawdata">
+                            <div class="container-fluid" id="tblcontainer" style="overflow-x:scroll;">
+                                
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+
+</body>
+</html>
