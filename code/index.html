@@ -28,13 +28,7 @@
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
 	<!---<script src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.2.0/vis.min.js"></script>--->
 	<script src="scripts/charts.js"></script>
-	<script src="scripts/chartGlobalOptions.js"></script>	
-	
-	<!--- load datatables resources --->
-	<script src="scripts/datatables/jquery.dataTables.js"></script>
-	<script src="scripts/datatables/TableTools.js"></script>
-	<script src="scripts/datatables/dataTables.bootstrap.js"></script>
-	
+	<script src="scripts/chartGlobalOptions.js"></script>		
 	<script src="scripts/fdachallenge.js"></script>
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -139,103 +133,6 @@
         <!-- Page Content -->
         <div id="page-content-wrapper">
             <div class="container-fluid">
-            	<div class="row" id="datatablesDemo">
-                    <div id="searchResultsContainer" class="col-lg-12">
-                        <div class="row">
-                            <div class="col-xs-12">
-                                <div class="box-content no-padding">
-                                    <table class="table table-bordered table-striped table-hover table-heading table-datatable" id="datatable-1">
-                                        <thead>
-                                            <tr>
-                                                <th>Name</th>
-                                                <th>Description</th>
-                                                <th>Type</th>
-                                                <th>ID/Code</th>
-                                                <th>Start Date</th>
-                                                <th>End Date</th>
-                                                <th class="nosort"> actions </th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <!-- Start: list_row -->
-                                            <tr>
-                                                <td>Eagle Claw</td>
-                                                <td>Mission to strike fear into the heart of...someone</td>
-                                                <td>Combat Support</td>
-                                                <td>401C3</td>
-                                                <td>01/30/2015</td>
-                                                <td>12/01/2015</td>
-                                                <td>
-                                                    <a href="#" data-href="Eagle Claw" class="editLink">
-                                                        <i class="fa fa-pencil" data-toggle="tooltip" data-placement="top" title="Edit this mission"></i>
-                                                    </a>
-                                                    &nbsp;&nbsp;&nbsp;&nbsp;
-                                                    <a href="#" data-href="Eagle Claw" data-toggle="modal" data-target="#confirm-delete" class="confirmMe">
-                                                        <i class="fa fa-times makeRed" data-toggle="tooltip" data-placement="top" title="Delete this mission"></i>
-                                                    </a>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>Tiger Claw</td>
-                                                <td>Mission to paint stripes on the moon</td>
-                                                <td>Space Support</td>
-                                                <td>75ZWT</td>
-                                                <td>02/28/2015</td>
-                                                <td>12/01/2015</td>
-                                                <td>
-                                                    <a href="#" data-href="Tiger Claw" class="editLink">
-                                                        <i class="fa fa-pencil" data-toggle="tooltip" data-placement="top" title="Edit this mission"></i>
-                                                    </a>
-                                                    &nbsp;&nbsp;&nbsp;&nbsp;
-                                                    <a href="#" data-href="Tiger Claw" data-toggle="modal" data-target="#confirm-delete" class="confirmMe">
-                                                        <i class="fa fa-times makeRed" data-toggle="tooltip" data-placement="top" title="Delete this mission"></i>
-                                                    </a>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>Fish Hand</td>
-                                                <td>Mission to eradicate fish hand</td>
-                                                <td>Air Combat</td>
-                                                <td>WWHYY</td>
-                                                <td>04/30/2015</td>
-                                                <td>12/01/2015</td>
-                                                <td>
-                                                    <a href="#" data-href="Tiger Claw" class="editLink">
-                                                        <i class="fa fa-pencil" data-toggle="tooltip" data-placement="top" title="Edit this mission"></i>
-                                                    </a>
-                                                    &nbsp;&nbsp;&nbsp;&nbsp;
-                                                    <a href="#" data-href="Tiger Claw" data-toggle="modal" data-target="#confirm-delete" class="confirmMe">
-                                                        <i class="fa fa-times makeRed" data-toggle="tooltip" data-placement="top" title="Delete this mission"></i>
-                                                    </a>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>Monkey Paw</td>
-                                                <td>Mission to save the rainforest</td>
-                                                <td>Humanitarian</td>
-                                                <td>8675309</td>
-                                                <td>03/30/2015</td>
-                                                <td>12/01/2016</td>
-                                                <td>
-                                                    <a href="#" data-href="Tiger Claw" class="editLink">
-                                                        <i class="fa fa-pencil" data-toggle="tooltip" data-placement="top" title="Edit this mission"></i>
-                                                    </a>
-                                                    &nbsp;&nbsp;&nbsp;&nbsp;
-                                                    <a href="#" data-href="Tiger Claw" data-toggle="modal" data-target="#confirm-delete" class="confirmMe">
-                                                        <i class="fa fa-times makeRed" data-toggle="tooltip" data-placement="top" title="Delete this mission"></i>
-                                                    </a>
-                                                </td>
-                                            </tr>
-                                            <!-- End: list_row -->
-                                        </tbody>
-                                        <tfoot>
-                                        </tfoot>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div><!-- end of search results container div -->
-				</div>
                 <div class="row">
                     <div class="col-lg-12">
                     	<canvas id="chartTarg" width="700" height="700"></canvas>
