@@ -106,7 +106,7 @@
                     </li>
                     <li>
 
-                        <label >Data Spike Threshold Percent:</label>
+                        <label >Data Spike Threshold Percent:<br /></label>
                         <div >
                             <input type="text" id="spikepct" name="spikepct" class="form-control" value="25" placeholder="" data-toggle="tooltip" data-placement="bottom" title="Percentage above average that identifies a spike.">
                         </div>						
@@ -135,9 +135,10 @@
             <!--</div>-->
         </div>
         <div class="col-lg-6">
-            <h3 id="charttitle" name="charttitle"></h3>
+            <h3 id="charttitle" name="charttitle"></h3><h6 id="charttitlenote" name="charttitlenote"></h6>
+            
             <div class="panel-body" id="chartdiv" style="overflow-x:scroll; height:600px; width:800px;">
-
+               
                 <canvas id="chartTarg"></canvas>
 
             </div>

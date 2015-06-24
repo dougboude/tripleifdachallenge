@@ -101,6 +101,7 @@ $(document).ready(function () {
         } catch (e) { }
 
         $("#charttitle").text("");
+        $("#charttitlenote").text("");
     });
 
     //enable the build graph button
@@ -247,6 +248,7 @@ function getEventsByDate(startdate, enddate, drugname,reactionname,substancename
     $.get(targurl + "&count=patient.reaction.reactionmeddrapt.exact", function (data) { populateReactionSelect(data.results); }, "json");
 
     $("#charttitle").text(reactionname + " reactions for " + ((drugname + substancename == "") ? "ALL DRUGS" : drugname + " " + substancename) + " between " + startdate + " thru " + enddate);
+    $("#charttitlenote").text("NOTE: data spikes are in red");
 
     console.log(targurl + "&count=receivedate");
 }
@@ -510,7 +512,7 @@ function drawGraph(dater){
 	    barValueSpacing: 5,
 
 	    //Number - Spacing between data sets within X values
-	    barDatasetSpacing: -3,
+	    barDatasetSpacing: -10,
 
 	    //String - A legend template
 	    legendTemplate: "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<datasets.length; i++){%><li><span style=\"background-color:<%=datasets[i].fillColor%>\"></span><%if(datasets[i].label){%><%=datasets[i].label%><%}%></li><%}%></ul>"
