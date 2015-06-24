@@ -44,8 +44,8 @@
 		context.canvas.width  = width;
 		context.canvas.height = height;
 
-		var width = this.width = context.canvas.width;
-		var height = this.height = context.canvas.height;
+		width = this.width = context.canvas.width;
+		height = this.height = context.canvas.height;
 		this.aspectRatio = this.width / this.height;
 		//High pixel density displays - multiply the size of the canvas height/width by the device pixel ratio, then scale.
 		helpers.retinaScale(this);
@@ -971,16 +971,20 @@
 							});
 
 							helpers.each(Elements, function(element) {
-								xPositions.push(element.x);
-								yPositions.push(element.y);
+							    xPositions.push(element.x);
+							    yPositions.push(element.y);
 
 
-								//Include any colour information about the element
-								tooltipLabels.push(helpers.template(this.options.multiTooltipTemplate, element));
-								tooltipColors.push({
-									fill: element._saved.fillColor || element.fillColor,
-									stroke: element._saved.strokeColor || element.strokeColor
-								});
+							    //Include any colour information about the element
+
+							    if (this.options.multiTooltipTemplate != "<%%>"){
+
+							        tooltipLabels.push(helpers.template(this.options.multiTooltipTemplate, element));
+							        tooltipColors.push({
+							            fill: element._saved.fillColor || element.fillColor,
+							            stroke: element._saved.strokeColor || element.strokeColor
+							        });
+							    }
 
 							}, this);
 
@@ -1015,7 +1019,7 @@
 						labels: tooltipLabels,
 						legendColors: tooltipColors,
 						legendColorBackground : this.options.multiTooltipKeyBackground,
-						title: ChartElements[0].label,
+						title: ChartElements[0].toolTipLabel,
 						chart: this.chart,
 						ctx: this.chart.ctx,
 						custom: this.options.customTooltips
@@ -2136,6 +2140,7 @@
 					datasetObject.bars.push(new this.BarClass({
 						value : dataPoint,
 						label : data.labels[index],
+						toolTipLabel : data.toolTipLabels[index],
 						datasetLabel: dataset.label,
 						strokeColor : dataset.strokeColor,
 						fillColor : dataset.fillColor,
@@ -2601,7 +2606,8 @@
 			helpers.each(data.datasets,function(dataset){
 
 				var datasetObject = {
-					label : dataset.label || null,
+				    label: dataset.label || null,
+				    toolTipLabel: data.toolTipLabels[index],
 					fillColor : dataset.fillColor,
 					strokeColor : dataset.strokeColor,
 					pointColor : dataset.pointColor,
