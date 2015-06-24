@@ -669,7 +669,10 @@ function prepTableDataForExport(dater,colnames){
 		var thisobj = {};
 		$(childarray).each(function(i,val){
 			//setting the key by looking up the corresponding column name in the columns array
-			thisobj[colnames[i].sTitle] = val;
+		    try {
+		        thisobj[colnames[i].sTitle] = val;
+		    } catch (e) {
+		    }
 		});
 		retval.push(thisobj);
 	});
