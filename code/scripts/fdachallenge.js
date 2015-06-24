@@ -637,7 +637,8 @@ function createDTSDataSet(dset) {
         "columns": keyWLDataColumns,
         "pageLength": 3,
         "paging": true,
-        "lengthChange": false,
+        "lengthChange": true,
+        "lengthMenu": [1,3,5],
         "scrollX": true,
         "oLanguage": {
             "sSearch": "Filter Terms:",
