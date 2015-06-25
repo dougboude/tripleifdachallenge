@@ -103,9 +103,17 @@
                        
                             <input type="text" id="startDate" name="startDate" data-provide="datepicker" class="datepicker" value="2010-01-01" placeholder="Start Date" data-toggle="tooltip" data-placement="bottom" title="Enter a start date. (eg. YYYY-MM-DD)" data-date-format="yyyy-mm-dd">
                             <input type="text" id="endDate" name="endDate" data-provide="datepicker" class="datepicker" value="2010-12-31" placeholder="End Date" data-toggle="tooltip" data-placement="bottom" title="Enter an end date. (eg. YYYY-MM-DD)" data-date-format="yyyy-mm-dd">
-
-                         </div>
+	                    </div>
                     </li>
+					<li>
+						<label>Show Data By:</label>
+						<select id="selGroupTime" name="selGroupTime" size="1" class="form-control">
+							<option value="day" selected>Day</option>
+							<option value="week">Week</option>
+							<option value="month">Month</option>
+							<option value="year">Year</option>
+						</select>
+					</li>
                     <li>
 
                         <label >Data Spike Threshold Percent:<br /></label>

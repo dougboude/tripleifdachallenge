@@ -243,7 +243,7 @@ function getEventsByDate(startdate, enddate, drugname,reactionname,substancename
         }
     });
 
-    $.get(targurl + "&count=receivedate", function (data) { drawGraph(data.results); }, "json");
+    $.get(targurl + "&count=receivedate", function (data) { drawGraph(timeGroup(data.results,$('#selGroupTime').val())); }, "json");
 
     $.get(targurl + "&count=patient.reaction.reactionmeddrapt.exact", function (data) { populateReactionSelect(data.results); }, "json");
 
@@ -772,4 +772,56 @@ function JSONToCSVConvertor(JSONData, ReportTitle, ShowLabel) {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+}
+
+function timeGroup(dater,groupby){
+//elem.time = 20100501
+	var retval = [];
+	var getKey = function getKey(string,start,stop){return string.substring(start,stop);};
+	var thiskey = "";
+	var lastkey = "";
+	var aggVal = 0;
+	console.log(dater);
+	switch(groupby){
+		case 'day':
+		//return dater as is
+			return dater;
+		break;
+		case 'week':
+		
+		break;
+		case 'month':
+			//aggregating by year/month
+			start = 0;
+			stop = 6;
+		break;
+		case 'year':
+			//aggregating by year
+			start = 0;
+			stop = 4;
+		break;
+		default:
+			console.log('hit default. groupby is ' + groupby);
+		break;
+	}
+	
+	
+	$(dater).each(function(key,value){
+		thiskey = getKey(value.time,start,stop);
+		lastkey = (lastkey == "")?thiskey:lastkey;
+		//console.log('thiskey: ' + thiskey + ' lastkey: ' + lastkey + ' thisval:' + value.count + ' aggval: ' + aggVal + ' key: ' + key + ' daterlength: ' + dater.length);
+
+		//do we push this object on to the stack, or go around again?
+		if(thiskey != lastkey || key == dater.length-1){
+			aggVal += value.count;
+			retval.push({count : aggVal, time: lastkey});
+			aggVal = 0;
+		} else {
+			aggVal += value.count;
+		}
+		
+		lastkey = thiskey;
+	});
+	//console.log(retval);
+	return retval;
 }
