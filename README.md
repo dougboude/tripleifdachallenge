@@ -31,5 +31,7 @@ or
 
 # Packaging
 
-This distribution file will be a simple zip file.
+A functional prototype of this web app, named Triple-i Researcher, is posted at http://iiiresearch.net/.
+
+This web app may also be distributed via a simple zip file, to be installed and run locally.
 To install, unzip the file on your local PC, then open index.html with a modern browser.

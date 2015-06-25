@@ -1,24 +1,24 @@
 var apikey = "z0wwT73I3DtNL8cxr3VUc7shQsESx0MPIyuTYQv9";
 var apirooturl = "https://api.fda.gov/drug/event.json?api_key=" + apikey + "&search=";
 var myBarChart = ""; //setting a global variable so we can access our chart from any function
+
 var activeBars = {};
 var tier2chart = "";
-var keyWL = ["safetyreportid", "reactionmeddrapt", "patientweight", "drugcharacterization", "medicinalproduct",
-    "drugdosagetext", "manufacturer_name", "brand_name", "route", "pharm_class_epc", "generic_name", "patientonsetage", "patientsex"];
+
+var keyWL = ["safetyreportid", "reactionmeddrapt", "patientweight", "drugcharacterization", "medicinalproduct","drugdosagetext", "patientonsetage", "patientsex", "route", "pharm_class_epc", "generic_name"];
+
 var keyWLDataColumns = [    
-    { "title": "safetyreportid"},
-    { "title": "reactionmeddrapt" },
-    { "title": "patientweight" },
-    { "title": "drugcharacterization" },
-    { "title": "medicinalproduct" },
-    { "title": "drugdosagetext" },
-    { "title": "manufacturer_name" },
-    { "title": "brand_name" },
-    { "title": "route" },
-    { "title": "pharm_class_epc" },
-    { "title": "generic_name" },
-    { "title": "patientonsetage" },
-    { "title": "patientsex" }
+    { "title": "safetyreportid", "defaultContent": "" },
+    { "title": "reactionmeddrapt", "defaultContent": "" },
+    { "title": "patientweight", "defaultContent": "" },
+    { "title": "drugcharacterization", "defaultContent": "" },
+    { "title": "medicinalproduct", "defaultContent": "" },
+    { "title": "drugdosagetext", "defaultContent": "" },
+    { "title": "patientonsetage", "defaultContent": "" },
+    { "title": "patientsex", "defaultContent": "" },
+    { "title": "route", "defaultContent": "" },
+    { "title": "pharm_class_epc", "defaultContent": "" },
+    { "title": "generic_name", "defaultContent": "" }
 ];
 
 $(document).ready(function () {
@@ -28,8 +28,7 @@ $(document).ready(function () {
 
     //hide results row
     hideResultsRow();
-
-
+    
     $('#chartdiv').hide();
 
     //enable the search button
@@ -67,7 +66,6 @@ $(document).ready(function () {
 
     });
 
-
     //enable chart canvas to watch for user clicks
     $('#chartTarg').click(function (evt) {
         
@@ -103,6 +101,7 @@ $(document).ready(function () {
         } catch (e) { }
 
         $("#charttitle").text("");
+        $("#charttitlenote").text("");
     });
 
     //enable the build graph button
@@ -125,6 +124,18 @@ $(document).ready(function () {
 
        
        
+    });
+    $("#tier2modal").on('hidden.bs.modal', function () {
+
+        $('input[name=ChartType]').each(function(){
+            $(this).prop('checked', false);
+        });
+
+        try {
+            tier2chart.clear();
+            tier2chart.destroy();
+        } catch (e) { }
+
     });
 
 });
@@ -198,12 +209,15 @@ function getEventsByDate(startdate, enddate, drugname,reactionname,substancename
     var reaction = "";
     var substance = "";
 
+    drugname = drugname.toUpperCase();
+    substancename = substancename.toUpperCase();
+
     if (!drugname.match(/^$/)) {
         drugs = "(generic_name:" + drugname + ")+AND+";
     }
 
     if (!substancename.match(/^$/)) {
-        substance = "(substance_name:" + substancename + ")+AND+";
+        substance = "(substance_name:" + substancename.toUpperCase() + ")+AND+";
     }
 
     if (reactionname!=null && !reactionname.match(/^$/)) {
@@ -233,7 +247,8 @@ function getEventsByDate(startdate, enddate, drugname,reactionname,substancename
 
     $.get(targurl + "&count=patient.reaction.reactionmeddrapt.exact", function (data) { populateReactionSelect(data.results); }, "json");
 
-    $("#charttitle").text(reactionname + " reactions for " + drugname + " " + substancename + " between " + startdate + " thru " + enddate);
+    $("#charttitle").text(reactionname + " reactions for " + ((drugname + substancename == "") ? "ALL DRUGS" : drugname + " " + substancename) + " between " + startdate + " thru " + enddate);
+    $("#charttitlenote").text("NOTE: data spikes are in red");
 
     console.log(targurl + "&count=receivedate");
 }
@@ -361,7 +376,8 @@ function fixUpFDAData(incoming) {
 	    $(incoming).each(function (key, value) {
 
 	        retval.labels.push((value.term == undefined ? formatDate(value.time) : value.term));
-	        retval.toolTipLabels.push((value.term == undefined ? (value.count + " reactions on " + formatDate(value.time) + " ( " + Math.round((value.count / avgVal) * 100).toString() + "% of the average " + avgVal.toString() + " for the period " + formatDate($('#startDate').val()) + " TO " + formatDate($('#endDate').val()) + ") ") : value.term));
+	        retval.toolTipLabels.push((value.term == undefined ? (value.count + " reactions on " + formatDate(value.time) + " ") : value.term));
+	        //( " + Math.round((value.count / avgVal) * 100).toString() + "% of the average " + avgVal.toString() + " for the period " + formatDate($('#startDate').val()) + " TO " + formatDate($('#endDate').val()) + ") 
 	        
 	        if( parseInt($('#spikepct').val()) > 0  ){
 	            if (((value.count / avgVal) * 100) >= (parseInt($('#spikepct').val()) + 100) ) {
@@ -398,6 +414,17 @@ function fixUpFDADataTier2(incoming,dsType) {
         ]
     };
 
+    /* 20150624 sort routine added by DVS */
+    if (incoming && incoming.length > 1) {
+	if (dsType === "WEIGHT" || dsType === "AGE") {
+	    incoming = incoming.sort(function(a, b) {
+                 //Sort asc
+                 return (a.term > b.term) ? 1 : ((a.term < b.term) ? -1 : 0);
+	    });
+	}
+    }
+
+
     $(incoming).each(function (key, value) {
       
         if (dsType == "SEX") {
@@ -408,7 +435,7 @@ function fixUpFDADataTier2(incoming,dsType) {
 
         } else if (dsType == "WEIGHT") {
 
-            retval.labels.push(Math.round( parseFloat( value.term) * 2.20462  ));
+            retval.labels.push(Math.round( parseFloat( value.term) * 2.20462  ));  //Converting kilograms to pounds; we probably should make this an option, as many researchers would likely prefer kilos
             retval.toolTipLabels.push(Math.round(parseFloat(value.term) * 2.20462));
             retval.datasets[0].data.push(value.count);
 
@@ -496,7 +523,7 @@ function drawGraph(dater){
 	    barValueSpacing: 5,
 
 	    //Number - Spacing between data sets within X values
-	    barDatasetSpacing: -3,
+	    barDatasetSpacing: -10,
 
 	    //String - A legend template
 	    legendTemplate: "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<datasets.length; i++){%><li><span style=\"background-color:<%=datasets[i].fillColor%>\"></span><%if(datasets[i].label){%><%=datasets[i].label%><%}%></li><%}%></ul>"
@@ -572,75 +599,62 @@ function drawTier2Graph(dater,dsType) {
 }
 
 function createDTSDataSet(dset) {
-
-
     //wordlist of properties on the data record to retrieve.  Must be in the iorder that they appear on the record
-
-
+    
     var retDset = [];
     
-    $(dset).each(function (k, v) {        
-        var resM = listAllProperties(v);
-        var retRow = Array(keyWL.length).join(".").split(".");
-        $(resM).each(function (Memkey,memval) { 
-            if (v[memval] != null && v[memval].toString() == "[object Object]") {
-                var subresM = listAllProperties(v[memval]);
-                $(subresM).each(function (mk, mv) {
-                    if (keyWL.indexOf(mv) > -1) {
-                        retRow[keyWL.indexOf(mv)] = (v[memval][mv].length < 1) ? " " : v[memval][mv] ;
-                    }
-                });
-            }else if (keyWL.indexOf(memval)>-1) {
-                retRow[keyWL.indexOf(memval)] = (v[memval].length < 1) ?  " " : v[memval] ; 
+    $(dset).each(function (k, v) {
+
+        var retRow = Array(13).join(".").split(".");
+
+
+        try { retRow[0] = v[keyWL[0]]; } catch (e) { retRow[0] = ""; }                                //"safetyreportid",   
+            
+        $(v["patient"]["reaction"]).each(function (kEy, vAl) {  //"reactionmeddrapt"];
+            retRow[1] += vAl[keyWL[1]] + ',';
+        });   
+            
+        try {  retRow[2] = v["patient"][keyWL[2]];   } catch (e) { retRow[2] = ""; }      //  "patientweight"];
+        try { retRow[7] = v["patient"][keyWL[7]];  } catch (e) { retRow[7] = ""; }          // "patientsex"];
+
+        try { retRow[6] = v["patient"][keyWL[6]]; } catch (e) { retRow[6] = ""; } //  "patientonsetage"];
+
+        $(v["patient"]["drug"]).each(function (kEy, vAl) {  
+
+
+            try { retRow[3] += vAl[keyWL[4]] + ":" + vAl[keyWL[3]] + ','; } catch (e) { retRow[3] = "";}          // "drugcharacterization"];
+            try { retRow[4] += vAl[keyWL[4]] + ','; } catch (e) { retRow[4] = ""; }           //  "medicinalproduct"];
+            try {
+
+                retRow[5] += ($.isArray(vAl[keyWL[5]])) ? vAl[keyWL[5]].join(',') : (( vAl[keyWL[5]] != undefined ) ? vAl[keyWL[5]] : "" ) ;
+
+            } catch (e) {
+                retRow[5] = "";
             }
+            //  "drugdosagetext"];
+            try { retRow[8] += vAl["openfda"][keyWL[8]].join(',') + ','; } catch (e) { retRow[8] = ""; }           //  "route"];
+            try { retRow[10] += vAl["openfda"][keyWL[10]].join(',') + ','; } catch (e) { retRow[10] = ""; }         //  "generic_name"];
+            try { retRow[9] += vAl["openfda"][keyWL[9]].join(',') + ','; } catch (e) { retRow[9] = ""; }               // "pharm_class_epc"];
+
+
         });
+
         retDset.push(retRow);          
     });
-
-    //console.log(retDset);
-
-
-    //$("#tblcontainer").html('done. ');
-
-    //var tableProgress = $("<table id='tblrawdata'><tr><th></th></tr><tr><td></td></tr></table>");
-
-    //$("#tblcontainer").empty().append(tableProgress);
-
-
-    //$('#tblrawdata').dataTable({
-    //    "aaSorting": [[0, "asc"]],
-    //    "sDom": "<'box-content'<'col-sm-6'f><'col-sm-6 text-right dtlength'l><'clearfix'>>rt<'box-content'<'col-sm-6'i><'col-sm-6 text-right'p><'clearfix'>>",
-    //    "sPaginationType": "bootstrap",
-    //    "oLanguage": {
-    //        "sSearch": "Type search phrase...",
-    //        "sZeroRecords": "There are no records that match your search criteria",
-    //        "sLengthMenu": '_MENU_'
-    //    },
-    //    "aoColumnDefs": [
-    //        { 'bSortable': false, 'aTargets': [6] }
-    //    ],
-    //    "fnInitComplete": function () {
-    //        $('.dtlength label').html("Number of Records to Display: " + $('.dtlength label').html());
-    //    }
-    //});
-
-    
-    //$('#tblrawdata').dataTable({
-    //    "columns": keyWLDataColumns,
-    //    "data": retDset,
        
-    //});
-
-
-   
 
     $('#tblcontainer').html('<table cellpadding="0" cellspacing="0" border="0" class="table table-striped table-bordered" id="example" ></table>');
 
     $('#example').dataTable({
         "data": retDset,
         "columns": keyWLDataColumns,
+        "pageLength": 3,
+        "paging": true,
+        "lengthChange": true,
+        "lengthMenu": [1,3,5],
+        "scrollX": true,
         "oLanguage": {
-            "sSearch": "Type value to search on...&nbsp;&nbsp;",
+            "sSearch": "Filter Terms:",
             "sZeroRecords": "There are no records that match your search criteria",
             "sLengthMenu": '_MENU_'
 			},
@@ -654,7 +668,7 @@ function createDTSDataSet(dset) {
 				})
 			);
         },	
-		"sDom": "<'btnExportGrid'><'clear'><'box-content'<'col-sm-2'f><'col-sm-10 text-right dtlength'l><'clearfix'>>rt<'box-content'<'col-sm-6'i><'col-sm-6 text-right'p><'clearfix'>>"
+		"sDom": "<'btnExportGrid'><'clear'><'box-content'<'col-sm-3'f><'col-sm-9 text-right dtlength'l><'clearfix'>>rt<'box-content'<'col-sm-6'i><'col-sm-6 text-right'p><'clearfix'>>"
     });
 }
 
@@ -666,7 +680,10 @@ function prepTableDataForExport(dater,colnames){
 		var thisobj = {};
 		$(childarray).each(function(i,val){
 			//setting the key by looking up the corresponding column name in the columns array
-			thisobj[colnames[i].sTitle] = val;
+		    try {
+		        thisobj[colnames[i].sTitle] = val;
+		    } catch (e) {
+		    }
 		});
 		retval.push(thisobj);
 	});
