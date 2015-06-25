@@ -398,6 +398,45 @@ function fixUpFDAData(incoming) {
 }
 
 function fixUpFDADataTier2(incoming,dsType) {
+
+   //Begin 20150625 DVS addition
+   var bundleData = function(sortedIn, ds_Type) {
+       debugger;
+       var bundled = [];
+       var maxInput = Math.round( parseFloat( sortedIn[sortedIn.length-1].term));
+       var x=0, magnitude = 0.0, index=0, maxCells = 0;  //Initialization
+
+       if (dsType === "AGE") {
+          maxCells = Math.ceil(maxInput / 10);  //Group by decades; e.g. 0-10;11-20;...91-100
+          while(x<maxCells) {
+              var newItem = new Object();
+              newItem.term = (x === 0) ? '0' : (((x * 10)+1)+'');
+              newItem.term = newItem.term + '-' + (((x+1)*10)+'');  //Now, label is a string range; e.g. "0-10", "11-20", etc.
+              newItem.count = 0;
+              newItem.component = [];
+
+              bundled.push(newItem);
+              x = x + 1;
+          }
+
+          //Having now defined the cells to store our bundles, now we need to aggregate
+          $(sortedIn).each(function (key, value) {
+              magnitude = Math.round( parseFloat( value.term ));
+              index = (magnitude < 1.0) ? 0 : Math.floor((magnitude-1) / 10);
+              bundled[index].count += value.count;
+              bundled[index].component.push(value);
+          });
+          
+
+       } else if (dsType === "WEIGHT") {
+          //Pounds
+       } else if (dsType === "WEIGHT_KG") {
+       }
+
+       return bundled;  //<-- TEMP
+   }
+
+   //End   20150625 DVS addition
    
     var retval = {
         toolTipLabels: [],
@@ -416,11 +455,17 @@ function fixUpFDADataTier2(incoming,dsType) {
 
     /* 20150624 sort routine added by DVS */
     if (incoming && incoming.length > 1) {
-	if (dsType === "WEIGHT" || dsType === "AGE") {
+	if (dsType === "WEIGHT" || dsType === "WEIGHT_KG" || dsType === "AGE") {
 	    incoming = incoming.sort(function(a, b) {
                  //Sort asc
                  return (a.term > b.term) ? 1 : ((a.term < b.term) ? -1 : 0);
 	    });
+
+            //Next step added 20150625 by DVS -- group items
+            if (incoming.length > 5) {
+                incoming = bundleDataByType(incoming, dsType);
+                dsType = "BUNDLED_" + dsType;
+            }
 	}
     }
 
@@ -431,6 +476,12 @@ function fixUpFDADataTier2(incoming,dsType) {
 
             retval.labels.push(value.term.toString().replace("0","Unknown").replace("1","Male").replace("2","Female") );
             retval.toolTipLabels.push(value.term.toString().replace("0", "Unknown").replace("1", "Male").replace("2", "Female"));
+            retval.datasets[0].data.push(value.count);
+
+        } else if (dsType == "WEIGHT_KG") {
+
+            retval.labels.push(Math.round( parseFloat( value.term)));  
+            retval.toolTipLabels.push(Math.round(parseFloat(value.term)));
             retval.datasets[0].data.push(value.count);
 
         } else if (dsType == "WEIGHT") {
@@ -773,3 +824,86 @@ function JSONToCSVConvertor(JSONData, ReportTitle, ShowLabel) {
     link.click();
     document.body.removeChild(link);
 }
+
+/* 
+ *   makeEmptyBundles is a helper function, designed to create a collection of
+ *                    empty cells intended to assist bundling (grouping) 
+*                     data whose terms are best expressed as numbers.
+ *                    For example, group ages by decades ("0-10","11-20", ... "81-90")
+ *                                 or weights by 50 (pound) increments ("0-50","51-100", etc.)
+ *   ------------------------------
+ *   PARAMETERS
+ *        maxMagnitude     --  int  :  the largest value in the sorted range
+ *                                     to be bundled;  e.g. 83 or 83.6
+ *        groupsOf         --  int  :  a divisor;  e.g. group by 10s, or 50s, or 100s...
+ *   ------------------------------
+ *   RETURNS
+ *        A container array large enough to hold a range of values up to and including maxMagnitude.
+ *        Cells in this array will contain these fields:
+ *              term  :  a string label, e.g. "0-10", or "11-20", or "50-100"
+ *             count  :  number of items that fall into this group; based on the
+ *                       expectation that the source data to be sorted will have
+ *                       its own count for more discrete, pre-bundled data units.
+ *          component :  an empty array, intended to store copies of the original data
+ *                       units to be bundled
+ */
+function makeEmptyBundles(maxMagnitude,groupsOf) {
+    var bundled = [],
+        maxCells = Math.ceil(maxMagnitude / groupsOf),  //e.g. group by decades, or by 50 lb increments, etc.
+        index = 0,
+        x = 0;
+
+        while(x<maxCells) {
+              var newItem = new Object();
+              newItem.term = (x === 0) ? '0' : (((x * groupsOf)+1)+'');
+              newItem.term = newItem.term + '-' + (((x+1)*groupsOf)+'');  //Now, label is a string range; e.g. "0-10", "11-20", etc.
+              newItem.count = 0;
+              newItem.component = [];
+
+              bundled.push(newItem);
+              x = x + 1;
+        }
+
+       return bundled;
+}
+
+
+function bundleData(sortedIn, groupsOf) {
+       var bundled = [];
+       var maxInput = Math.round( parseFloat( sortedIn[sortedIn.length-1].term));
+       var x=0, magnitude = 0.0, index=0, maxCells = 0;  //Initialization
+
+debugger;
+       bundled = makeEmptyBundles(maxInput, groupsOf);
+
+          //Having now defined the cells to store our bundles, now we need to aggregate
+          $(sortedIn).each(function (key, value) {
+              magnitude = Math.round( parseFloat( value.term ));
+              index = (magnitude < 1.0) ? 0 : Math.floor((magnitude-1) / groupsOf);
+              bundled[index].count += value.count;
+              bundled[index].component.push(value);
+          });
+
+       return bundled;
+}
+
+function bundleDataByType(sortedIn, dsType) {
+
+       if (dsType === "AGE") {
+          return bundleData(sortedIn,10);
+       }
+
+       if (dsType === "WEIGHT") {
+          //Pounds
+          return bundleData(sortedIn,50);
+       }
+
+       if (dsType === "WEIGHT_KG") {
+          //Pounds
+          return bundleData(sortedIn,50);
+       }
+
+       //Otherwise... just return the input
+       return sortedIn;  
+}
+
