@@ -414,6 +414,17 @@ function fixUpFDADataTier2(incoming,dsType) {
         ]
     };
 
+    /* 20150624 sort routine added by DVS */
+    if (incoming && incoming.length > 1) {
+	if (dsType === "WEIGHT" || dsType === "AGE") {
+	    incoming = incoming.sort(function(a, b) {
+                 //Sort asc
+                 return (a.term > b.term) ? 1 : ((a.term < b.term) ? -1 : 0);
+	    });
+	}
+    }
+
+
     $(incoming).each(function (key, value) {
       
         if (dsType == "SEX") {
@@ -424,7 +435,7 @@ function fixUpFDADataTier2(incoming,dsType) {
 
         } else if (dsType == "WEIGHT") {
 
-            retval.labels.push(Math.round( parseFloat( value.term) * 2.20462  ));
+            retval.labels.push(Math.round( parseFloat( value.term) * 2.20462  ));  //Converting kilograms to pounds; we probably should make this an option, as many researchers would likely prefer kilos
             retval.toolTipLabels.push(Math.round(parseFloat(value.term) * 2.20462));
             retval.datasets[0].data.push(value.count);
 
