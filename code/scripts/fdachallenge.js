@@ -399,45 +399,6 @@ function fixUpFDAData(incoming) {
 
 function fixUpFDADataTier2(incoming,dsType) {
 
-   //Begin 20150625 DVS addition
-   var bundleData = function(sortedIn, ds_Type) {
-       debugger;
-       var bundled = [];
-       var maxInput = Math.round( parseFloat( sortedIn[sortedIn.length-1].term));
-       var x=0, magnitude = 0.0, index=0, maxCells = 0;  //Initialization
-
-       if (dsType === "AGE") {
-          maxCells = Math.ceil(maxInput / 10);  //Group by decades; e.g. 0-10;11-20;...91-100
-          while(x<maxCells) {
-              var newItem = new Object();
-              newItem.term = (x === 0) ? '0' : (((x * 10)+1)+'');
-              newItem.term = newItem.term + '-' + (((x+1)*10)+'');  //Now, label is a string range; e.g. "0-10", "11-20", etc.
-              newItem.count = 0;
-              newItem.component = [];
-
-              bundled.push(newItem);
-              x = x + 1;
-          }
-
-          //Having now defined the cells to store our bundles, now we need to aggregate
-          $(sortedIn).each(function (key, value) {
-              magnitude = Math.round( parseFloat( value.term ));
-              index = (magnitude < 1.0) ? 0 : Math.floor((magnitude-1) / 10);
-              bundled[index].count += value.count;
-              bundled[index].component.push(value);
-          });
-          
-
-       } else if (dsType === "WEIGHT") {
-          //Pounds
-       } else if (dsType === "WEIGHT_KG") {
-       }
-
-       return bundled;  //<-- TEMP
-   }
-
-   //End   20150625 DVS addition
-   
     var retval = {
         toolTipLabels: [],
         labels: [],
@@ -463,6 +424,14 @@ function fixUpFDADataTier2(incoming,dsType) {
 
             //Next step added 20150625 by DVS -- group items
             if (incoming.length > 5) {
+               if (dsType === "WEIGHT") {
+                   //Expect that source data is weight in kilograms.  Convert Kgs to lbs
+                   $(incoming).each(function (key, value) {
+                      value.term = Math.round( parseFloat( value.term) * 2.20462  )
+                   });
+               }
+
+
                 incoming = bundleDataByType(incoming, dsType);
                 dsType = "BUNDLED_" + dsType;
             }
@@ -873,7 +842,6 @@ function bundleData(sortedIn, groupsOf) {
        var maxInput = Math.round( parseFloat( sortedIn[sortedIn.length-1].term));
        var x=0, magnitude = 0.0, index=0, maxCells = 0;  //Initialization
 
-debugger;
        bundled = makeEmptyBundles(maxInput, groupsOf);
 
           //Having now defined the cells to store our bundles, now we need to aggregate
@@ -900,7 +868,7 @@ function bundleDataByType(sortedIn, dsType) {
 
        if (dsType === "WEIGHT_KG") {
           //Pounds
-          return bundleData(sortedIn,50);
+          return bundleData(sortedIn,25);
        }
 
        //Otherwise... just return the input
