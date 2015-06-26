@@ -199,7 +199,7 @@ function getDrugNames(drugname){
 	    }, "json" );
 }
 
-function getEventsByDate(startdate, enddate, drugname,reactionname,substancename) {
+function getEventsByDate(startdate, enddate, drugname, reactionname, substancename) {
 
     var drugs = "";
     var reaction = "";
@@ -216,7 +216,7 @@ function getEventsByDate(startdate, enddate, drugname,reactionname,substancename
         substance = "(substance_name:" + substancename.toUpperCase() + ")+AND+";
     }
 
-    if (reactionname!=null && !reactionname.match(/^$/)) {
+    if (reactionname != null && !reactionname.match(/^$/)) {
         reaction = "(patient.reaction.reactionmeddrapt:" + reactionname + ")+AND+";
     }
 
@@ -232,14 +232,14 @@ function getEventsByDate(startdate, enddate, drugname,reactionname,substancename
                 AlertDialog('Error!', 'No Data Found.  Please refine your search parameters and try again.');
 
             } else if (x.status == 500) {
-                AlertDialog('Error!', 'Internal Server Error.');
+                AlertDialog('Error!', 'Internel Server Error.');
             } else {
-                AlertDialog('Error!', 'Unknown Error.\n' + x.responseText);
+                AlertDialog('Error!', 'Unknow Error.\n' + x.responseText);
             }
         }
     });
 
-    $.get(targurl + "&count=receivedate", function (data) { drawGraph(data.results); }, "json");
+    $.get(targurl + "&count=receivedate", function (data) { drawGraph(timeGroup(data.results, $('#selGroupTime').val())); }, "json");
 
     $.get(targurl + "&count=patient.reaction.reactionmeddrapt.exact", function (data) { populateReactionSelect(data.results); }, "json");
 
@@ -248,6 +248,7 @@ function getEventsByDate(startdate, enddate, drugname,reactionname,substancename
 
     console.log(targurl + "&count=receivedate");
 }
+
 
 function getTier2Data(selectedDate, drugname, reactionname, substancename) {
 
