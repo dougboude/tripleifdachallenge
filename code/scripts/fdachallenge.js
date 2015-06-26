@@ -157,7 +157,7 @@ function populateReactionSelect(reactions) {
 
     var persistSel = "";
 
-    if ($('#selreaction').val() != null && $('#selreaction').val() != "") {
+    if ($('#selreaction').val() !== null && $('#selreaction').val() !== "") {
         persistSel = $('#selreaction').val();
     }
     //clear the select's current options
@@ -221,13 +221,13 @@ function getEventsByDate(startdate, enddate, drugname, reactionname, substancena
     $.ajaxSetup({
         error: function (x, e) {
 
-            if (x.status == 0) {
+            if (x.status === 0) {
                 AlertDialog('Error!', ' Check Your Network.');
             }
-            else if (x.status == 404) {
+            else if (x.status === 404) {
                 AlertDialog('Error!', 'No Data Found.  Please refine your search parameters and try again.');
 
-            } else if (x.status == 500) {
+            } else if (x.status === 500) {
                 AlertDialog('Error!', 'Internel Server Error.');
             } else {
                 AlertDialog('Error!', 'Unknow Error.\n' + x.responseText);
@@ -239,7 +239,7 @@ function getEventsByDate(startdate, enddate, drugname, reactionname, substancena
 
     $.get(targurl + "&count=patient.reaction.reactionmeddrapt.exact", function (data) { populateReactionSelect(data.results); }, "json");
 
-    $("#charttitle").text(reactionname + " reactions for " + ((drugname + substancename == "") ? "ALL DRUGS" : drugname + " " + substancename) + " between " + startdate + " thru " + enddate);
+    $("#charttitle").text(reactionname + " reactions for " + ((drugname + substancename === "") ? "ALL DRUGS" : drugname + " " + substancename) + " between " + startdate + " thru " + enddate);
     $("#charttitlenote").text("NOTE: data spikes are in red");
 
     console.log(targurl + "&count=receivedate");
@@ -253,13 +253,13 @@ function getTier2Data(selectedDate, drugname, reactionname, substancename) {
     $.ajaxSetup({
         error: function (x, e) {
 
-            if (x.status == 0) {
+            if (x.status === 0) {
                 AlertDialog('Error!', ' Check Your Network.');
             }
-            else if (x.status == 404) {
+            else if (x.status === 404) {
                 AlertDialog('Error!', 'No Data Found.  Please refine your search parameters and try again.');
 
-            } else if (x.status == 500) {
+            } else if (x.status === 500) {
                 AlertDialog('Error!', 'Internel Server Error.');
             } else {
                 AlertDialog('Error!', 'Unknow Error.\n' + x.responseText);
@@ -280,13 +280,13 @@ function getTier2DataRaw(selectedDate, drugname, reactionname, substancename) {
     $.ajaxSetup({
         error: function (x, e) {
 
-            if (x.status == 0) {
+            if (x.status === 0) {
                 AlertDialog('Error!', ' Check Your Network.');
             }
-            else if (x.status == 404) {
+            else if (x.status === 404) {
                 AlertDialog('Error!', 'No Data Found.  Please refine your search parameters and try again.');
 
-            } else if (x.status == 500) {
+            } else if (x.status === 500) {
                 AlertDialog('Error!', 'Internel Server Error.');
             } else {
                 AlertDialog('Error!', 'Unknow Error.\n' + x.responseText);
@@ -308,7 +308,7 @@ function buildtier2Query(selectedDate, drugname, reactionname, substancename) {
     var substance = "";
     var receivedDate = "";
 
-    if (selectedDate.split("-").length == 3) {
+    if (selectedDate.split("-").length === 3) {
         //this is a single date. Query for data on that date alone
         sDate = FDADate(selectedDate);
     } else {
@@ -330,11 +330,11 @@ function buildtier2Query(selectedDate, drugname, reactionname, substancename) {
         substance = "(substance_name:" + substancename + ")+AND+";
     }
 
-    if (reactionname != null && !reactionname.match(/^$/)) {
+    if (reactionname !== null && !reactionname.match(/^$/)) {
         reaction = "(patient.reaction.reactionmeddrapt:" + reactionname + ")+AND+";
     }
 
-    if (sDate2 != "") {
+    if (sDate2 !== "") {
         receivedDate = "receivedate:[" + sDate + "+TO+" + sDate2 + "]";
     } else {
         receivedDate = "receivedate:" + sDate;
@@ -386,8 +386,8 @@ function fixUpFDAData(incoming) {
 
 	    $(incoming).each(function (key, value) {
 
-	        retval.labels.push((value.term == undefined ? formatDate(value.time) : value.term));
-	        retval.toolTipLabels.push((value.term == undefined ? (value.count + " reactions on " + formatDate(value.time) + " ") : value.term));
+	        retval.labels.push((value.term === undefined ? formatDate(value.time) : value.term));
+	        retval.toolTipLabels.push((value.term === undefined ? (value.count + " reactions on " + formatDate(value.time) + " ") : value.term));
 	        //( " + Math.round((value.count / avgVal) * 100).toString() + "% of the average " + avgVal.toString() + " for the period " + formatDate($('#startDate').val()) + " TO " + formatDate($('#endDate').val()) + ")
 
 	        if( parseInt($('#spikepct').val()) > 0  ){
@@ -438,7 +438,7 @@ function fixUpFDADataTier2(incoming,dsType) {
                if (dsType === "WEIGHT") {
                    //Expect that source data is weight in kilograms.  Convert Kgs to lbs
                    $(incoming).each(function (key, value) {
-                      value.term = Math.round( parseFloat( value.term) * 2.20462  )
+                      value.term = Math.round( parseFloat( value.term) * 2.20462  );
                    });
                }
 
@@ -452,25 +452,25 @@ function fixUpFDADataTier2(incoming,dsType) {
 
     $(incoming).each(function (key, value) {
 
-        if (dsType == "SEX") {
+        if (dsType === "SEX") {
 
             retval.labels.push(value.term.toString().replace("0","Unknown").replace("1","Male").replace("2","Female") );
             retval.toolTipLabels.push(value.term.toString().replace("0", "Unknown").replace("1", "Male").replace("2", "Female"));
             retval.datasets[0].data.push(value.count);
 
-        } else if (dsType == "WEIGHT_KG") {
+        } else if (dsType === "WEIGHT_KG") {
 
             retval.labels.push(Math.round( parseFloat( value.term)));
             retval.toolTipLabels.push(Math.round(parseFloat(value.term)));
             retval.datasets[0].data.push(value.count);
 
-        } else if (dsType == "WEIGHT") {
+        } else if (dsType === "WEIGHT") {
 
             retval.labels.push(Math.round( parseFloat( value.term) * 2.20462  ));  //Converting kilograms to pounds; we probably should make this an option, as many researchers would likely prefer kilos
             retval.toolTipLabels.push(Math.round(parseFloat(value.term) * 2.20462));
             retval.datasets[0].data.push(value.count);
 
-        } else if (dsType == "DRUGROLE") {
+        } else if (dsType === "DRUGROLE") {
 
             retval.labels.push(value.term.toString().replace("1", "Suspect drug").replace("2", "Concomitant drug").replace("3", "Interacting drug"));
             retval.toolTipLabels.push(value.term.toString().replace("1", "Suspect drug").replace("2", "Concomitant drug").replace("3", "Interacting drug"));
@@ -492,7 +492,7 @@ function fixUpFDADataTier2(incoming,dsType) {
 /* modified by Doug */
 function formatDate(dval) {
     var retval = dval;
-    if (dval.length == 8 && parseInt(dval) != NaN) {//if the value passed in isn't yyyymmdd, just return it as is
+    if (dval.length === 8 && !(isNaN(parseInt(dval))) ) {//if the value passed in isn't yyyymmdd, just return it as is
         var day = dval.replace(/-/ig, "").substr(6, 2).toString();
         var month = dval.replace(/-/ig, "").substr(4, 2).toString();
         var year = dval.replace(/-/ig, "").substr(0, 4).toString();
@@ -559,7 +559,7 @@ function drawGraph(dater){
 
 	    //String - A legend template
 	    legendTemplate: "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<datasets.length; i++){%><li><span style=\"background-color:<%=datasets[i].fillColor%>\"></span><%if(datasets[i].label){%><%=datasets[i].label%><%}%></li><%}%></ul>"
-	}
+	};
 
 
     //setup chart
@@ -621,7 +621,7 @@ function drawTier2Graph(dater,dsType) {
 
         //String - A legend template
         legendTemplate: "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<datasets.length; i++){%><li><span style=\"background-color:<%=datasets[i].fillColor%>\"></span><%if(datasets[i].label){%><%=datasets[i].label%><%}%></li><%}%></ul>"
-    }
+    };
 
 
     //setup chart
@@ -659,7 +659,7 @@ function createDTSDataSet(dset) {
             try { retRow[4] += vAl[keyWL[4]] + ','; } catch (e) { retRow[4] = ""; }           //  "medicinalproduct"];
             try {
 
-                retRow[5] += ($.isArray(vAl[keyWL[5]])) ? vAl[keyWL[5]].join(',') : (( vAl[keyWL[5]] != undefined ) ? vAl[keyWL[5]] : "" ) ;
+                retRow[5] += ($.isArray(vAl[keyWL[5]])) ? vAl[keyWL[5]].join(',') : (( vAl[keyWL[5]] !== undefined ) ? vAl[keyWL[5]] : "" ) ;
 
             } catch (e) {
                 retRow[5] = "";
@@ -736,19 +736,19 @@ function listAllProperties(o) {
 
 function JSONToCSVConvertor(JSONData, ReportTitle, ShowLabel) {
     //If JSONData is not an object then JSON.parse will parse the JSON string in an Object
-    var arrData = typeof JSONData != 'object' ? JSON.parse(JSONData) : JSONData;
+    var arrData = typeof JSONData !== 'object' ? JSON.parse(JSONData) : JSONData;
 
-    var CSV = '';
+    var CSV = '', row = "", index;
     //Set Report title in first row or line
 
     CSV += ReportTitle + '\r\n\n';
 
     //This condition will generate the Label/Header
     if (ShowLabel) {
-        var row = "";
+        row = "";
 
         //This loop will extract the label from 1st index of on array
-        for (var index in arrData[0]) {
+        for (index in arrData[0]) {
 
             //Now convert each value to string and comma-seprated
             row += index + ',';
@@ -762,10 +762,10 @@ function JSONToCSVConvertor(JSONData, ReportTitle, ShowLabel) {
 
     //1st loop is to extract each row
     for (var i = 0; i < arrData.length; i++) {
-        var row = "";
+        row = "";
 
         //2nd loop will extract each column and convert it in string comma-seprated
-        for (var index in arrData[i]) {
+        for (index in arrData[i]) {
             row += '"' + arrData[i][index] + '",';
         }
 
@@ -775,7 +775,7 @@ function JSONToCSVConvertor(JSONData, ReportTitle, ShowLabel) {
         CSV += row + '\r\n';
     }
 
-    if (CSV == '') {
+    if (CSV === '') {
         alert("Invalid data");
         return;
     }
@@ -814,7 +814,7 @@ function loadFrontPageChart() {
     var startdate = "2014-01-01";
     var enddate = "2014-06-03";
     var dataspike = { date: "", count: 0 };
-    var targurl = ""
+    var targurl = "";
     var retdata = [];
     var sexdata = [];
     var agedata = [];
@@ -824,12 +824,12 @@ function loadFrontPageChart() {
 
     $.ajaxSetup({ // ajax error setup
         error: function (x, e) {
-            if (x.status == 0) {
+            if (x.status === 0) {
                 AlertDialog('Error!', 'Cannot access FDA Data Web Service. Please Check Your Network Settings and Internet Availability.');
             }
-            else if (x.status == 404) {
+            else if (x.status === 404) {
                 AlertDialog('Error!', 'No Data Found.  Please refine your search parameters and try again.');
-            } else if (x.status == 500) {
+            } else if (x.status === 500) {
                 AlertDialog('Error!', 'Internel Server Error.');
             } else {
                 AlertDialog('Error!', 'Unknow Error.\n' + x.responseText);
@@ -850,12 +850,12 @@ function loadFrontPageChart() {
             $.get(targurl, function (data) {
 
                 $(data.results).each(function (key, value) {
-                    if (sexdata.length == 0 && value.term != 0) {
+                    if (sexdata.length === 0 && value.term !== 0) {
                         sexdata = [{ sex: value.term, count: value.count }];
-                    } else if (value.count >= (sexdata[0].count * 2) && value.term != 0) {
-                        sextext = " primarily affecting " + (value.term == 1 ? "Males " : "Females ");
+                    } else if (value.count >= (sexdata[0].count * 2) && value.term !== 0) {
+                        sextext = " primarily affecting " + (value.term === 1 ? "Males " : "Females ");
                         sexdata = [{ sex: value.term, count: value.count }];
-                    } else if (value.term != 0) {
+                    } else if (value.term !== 0) {
                         sexdata = [{ sex: sexdata[0].sex, count: sexdata[0].count }, { sex: value.term, count: value.count }];
                     }
                 });
@@ -884,11 +884,11 @@ function loadFrontPageChart() {
                     var top2age = { term: "", count: 0 };
 
                     $(aged).each(function (key, value) {
-                        if (topage.count == 0) {
+                        if (topage.count === 0) {
                             topage.count = value.count;
                             topage.term = value.term;
                         } else {
-                            if (top2age.count == 0) {
+                            if (top2age.count === 0) {
                                 top2age.count = value.count;
                                 top2age.term = value.term;
                             } else {
@@ -948,7 +948,7 @@ function loadFrontPageChart() {
                     });
 
                     $(sexdata).each(function (key, value) {
-                        var s = (value.sex == 1 ? "Male" : "Female");
+                        var s = (value.sex === 1 ? "Male" : "Female");
                         retval2.labels.push(s);
                         retval2.toolTipLabels.push(s + " : " + value.count);
                         retval2.datasets[0].data.push(value.count);
@@ -965,7 +965,7 @@ function loadFrontPageChart() {
                     var substances = "";
 
                         $(data.results).each(function (key, value) {
-                            if(key==0){
+                            if(key===0){
                                 substances += "" + value.term + "";
                                 sub_total = value.count;
                             }
@@ -1012,7 +1012,7 @@ function drawDefaultGraph(data1,data2) {
         barValueSpacing: 5,
         barDatasetSpacing: 10,
         legendTemplate: "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<datasets.length; i++){%><li><span style=\"background-color:<%=datasets[i].fillColor%>\"></span><%if(datasets[i].label){%><%=datasets[i].label%><%}%></li><%}%></ul>"
-    }
+    };
 
     //setup chart
     $("#chartTarg").css("width", "500px");
@@ -1076,7 +1076,7 @@ function makeEmptyBundles(maxMagnitude, groupsOf) {
         x = 0;
 
     while (x < maxCells) {
-        var newItem = new Object();
+        var newItem = {};
         newItem.term = (x === 0) ? '0' : (((x * groupsOf) + 1) + '');
         newItem.term = newItem.term + '-' + (((x + 1) * groupsOf) + '');  //Now, label is a string range; e.g. "0-10", "11-20", etc.
         newItem.count = 0;
@@ -1153,10 +1153,11 @@ function timeGroup(dater, groupby) {
     var lastkey = "";
     var aggVal = 0;
     var tmpdate = "";
+    var thisweek = 0;
 
     tier1AggMetadata = {};//resetting this global hash
 
-    if (groupby == "day") {
+    if (groupby === "day") {
         return dater;
     }
 
@@ -1175,7 +1176,7 @@ function timeGroup(dater, groupby) {
             case 'week':
                 thisweek = $.datepicker.iso8601Week(tmpdate);
                 //a little week fixing up because frickin iso8601 begins its weeks in a funky spot, sometimes rendering the first few days of January in the PRIOR YEAR'S LAST WEEK! bogus.
-                if (tmpdate.getMonth() == 0 && thisweek > 5) { thisweek = 1 };
+                if (tmpdate.getMonth() === 0 && thisweek > 5) { thisweek = 1; }
                 //create our group value key
                 thiskey = 'Week ' + thisweek + ' of ' + value.time.substring(0, 4);
                 break;
@@ -1190,11 +1191,11 @@ function timeGroup(dater, groupby) {
             default:
                 console.log('hit default. groupby is ' + groupby);
                 return;
-                break;
+                //Commenting, b/c unreachable due to previous line's return =>  break;
         }
 
         //group key all made! Let's start tracking key values vs iterations.
-        lastkey = (lastkey == "") ? thiskey : lastkey;//on our very first pass, lastkey will be blank...so grab thiskey value!
+        lastkey = (lastkey === "") ? thiskey : lastkey;//on our very first pass, lastkey will be blank...so grab thiskey value!
 
         //build our metadata object. Does this key exist in the object?
         if (!(thiskey in tier1AggMetadata)) {
@@ -1202,7 +1203,7 @@ function timeGroup(dater, groupby) {
         }
 
         //do we push this object on to the stack, or go around again?
-        if (thiskey != lastkey || key == dater.length - 1) {//either the key value changed since last iteration, OR we're at the end of our dater set
+        if (thiskey !== lastkey || key === dater.length - 1) {//either the key value changed since last iteration, OR we're at the end of our dater set
             aggVal += value.count;
             retval.push({ count: aggVal, time: lastkey });
             aggVal = 0;
