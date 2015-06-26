@@ -11,7 +11,7 @@ var tier1AggMetadata = {};//global var to hold metadata associated with the curr
 
 var keyWL = ["safetyreportid", "reactionmeddrapt", "patientweight", "drugcharacterization", "medicinalproduct","drugdosagetext", "patientonsetage", "patientsex", "route", "pharm_class_epc", "generic_name"];
 
-var keyWLDataColumns = [    
+var keyWLDataColumns = [
     { "title": "safetyreportid", "defaultContent": "" },
     { "title": "reactionmeddrapt", "defaultContent": "" },
     { "title": "patientweight", "defaultContent": "" },
@@ -29,10 +29,10 @@ $(document).ready(function () {
     //on page load
     //instantiate tool tips
     $("[data-toggle='tooltip']").tooltip();
-    
+
     //load default analysis chart
     loadFrontPageChart();
-    
+
     $('#chartdiv').hide();
 
     //enable the search button
@@ -41,7 +41,7 @@ $(document).ready(function () {
 
         $('#defaultdiv').hide();
         $('#chartdiv').show();
-        
+
 
         try {
             myBarChart.clear();
@@ -66,13 +66,13 @@ $(document).ready(function () {
         } catch (e) { }
 
         getTier2Data($('#selectedDate').val(), $('#iDrug').val(), $('#selreaction').val(), $('#subname').val());
-        
+
 
     });
 
     //enable chart canvas to watch for user clicks
     $('#chartTarg').click(function (evt) {
-        
+
 
         try {
             activeBars = myBarChart.getBarsAtEvent(evt);
@@ -96,9 +96,7 @@ $(document).ready(function () {
         $('#iDrug').val('');
         $('#startDate').val('2010-01-01');
         $('#endDate').val('2010-01-31');
-        //hide the search results select list
-        hideResultsRow();
-        // if (typeof myBarChart.destroy === 'function') {  };
+
         try {
             myBarChart.clear();
             myBarChart.destroy();
@@ -112,7 +110,7 @@ $(document).ready(function () {
     $('#btnBuildGraph').click(function () {
         getSpecificItemData($('#selSpecificProducts').val());
     });
-    
+
     ///MODAL FUNCTIONS
 
     $("#tier2modal").on('shown.bs.modal', function () {
@@ -122,8 +120,8 @@ $(document).ready(function () {
 
         getTier2DataRaw($('#selectedDate').val(), $('#iDrug').val(), $('#selreaction').val(), $('#subname').val());
 
-       
-       
+
+
     });
 
     $("#tier2modal").on('hidden.bs.modal', function () {
@@ -139,10 +137,8 @@ $(document).ready(function () {
 
     });
 
-
-
 });
-	
+
 
 function popResultsSelect(products){
 	//clear the select's current options
@@ -216,7 +212,7 @@ function getEventsByDate(startdate, enddate, drugname, reactionname, substancena
         substance = "(substance_name:" + substancename.toUpperCase() + ")+AND+";
     }
 
-    if (reactionname != null && !reactionname.match(/^$/)) {
+    if (reactionname !== null && !reactionname.match(/^$/)) {
         reaction = "(patient.reaction.reactionmeddrapt:" + reactionname + ")+AND+";
     }
 
@@ -248,7 +244,6 @@ function getEventsByDate(startdate, enddate, drugname, reactionname, substancena
 
     console.log(targurl + "&count=receivedate");
 }
-
 
 function getTier2Data(selectedDate, drugname, reactionname, substancename) {
 
@@ -361,10 +356,10 @@ function getSpecificItemData(target){
 function fixUpFDAData(incoming) {
     var avgVal = 0;
 
-    $(incoming).each(function (key, value) {       
+    $(incoming).each(function (key, value) {
         avgVal += value.count;
     });
-    avgVal = Math.round( avgVal / $(incoming).length ); 
+    avgVal = Math.round( avgVal / $(incoming).length );
 
     var retval = {
         toolTipLabels: [],
@@ -393,8 +388,8 @@ function fixUpFDAData(incoming) {
 
 	        retval.labels.push((value.term == undefined ? formatDate(value.time) : value.term));
 	        retval.toolTipLabels.push((value.term == undefined ? (value.count + " reactions on " + formatDate(value.time) + " ") : value.term));
-	        //( " + Math.round((value.count / avgVal) * 100).toString() + "% of the average " + avgVal.toString() + " for the period " + formatDate($('#startDate').val()) + " TO " + formatDate($('#endDate').val()) + ") 
-	        
+	        //( " + Math.round((value.count / avgVal) * 100).toString() + "% of the average " + avgVal.toString() + " for the period " + formatDate($('#startDate').val()) + " TO " + formatDate($('#endDate').val()) + ")
+
 	        if( parseInt($('#spikepct').val()) > 0  ){
 	            if (((value.count / avgVal) * 100) >= (parseInt($('#spikepct').val()) + 100) ) {
 	                retval.datasets[1].data.push(value.count);
@@ -414,7 +409,7 @@ function fixUpFDAData(incoming) {
 }
 
 function fixUpFDADataTier2(incoming,dsType) {
-   
+
     var retval = {
         toolTipLabels: [],
         labels: [],
@@ -429,7 +424,6 @@ function fixUpFDADataTier2(incoming,dsType) {
 			}
         ]
     };
-    
 
     /* 20150624 sort routine added by DVS */
     if (incoming && incoming.length > 1) {
@@ -441,6 +435,14 @@ function fixUpFDADataTier2(incoming,dsType) {
 
             //Next step added 20150625 by DVS -- group items
             if (incoming.length > 5) {
+               if (dsType === "WEIGHT") {
+                   //Expect that source data is weight in kilograms.  Convert Kgs to lbs
+                   $(incoming).each(function (key, value) {
+                      value.term = Math.round( parseFloat( value.term) * 2.20462  )
+                   });
+               }
+
+
                 incoming = bundleDataByType(incoming, dsType);
                 dsType = "BUNDLED_" + dsType;
             }
@@ -449,11 +451,17 @@ function fixUpFDADataTier2(incoming,dsType) {
 
 
     $(incoming).each(function (key, value) {
-      
+
         if (dsType == "SEX") {
 
             retval.labels.push(value.term.toString().replace("0","Unknown").replace("1","Male").replace("2","Female") );
             retval.toolTipLabels.push(value.term.toString().replace("0", "Unknown").replace("1", "Male").replace("2", "Female"));
+            retval.datasets[0].data.push(value.count);
+
+        } else if (dsType == "WEIGHT_KG") {
+
+            retval.labels.push(Math.round( parseFloat( value.term)));
+            retval.toolTipLabels.push(Math.round(parseFloat(value.term)));
             retval.datasets[0].data.push(value.count);
 
         } else if (dsType == "WEIGHT") {
@@ -493,7 +501,6 @@ function formatDate(dval) {
     return retval;
 }
 
-
 function FDADate(dval) {
 
     var day = dval.split("-")[1];
@@ -505,7 +512,7 @@ function FDADate(dval) {
 
 function drawGraph(dater){
 	var data = fixUpFDAData(dater);
-    
+
 	//console.log(data);
 	var options = {
 	    //Boolean - Whether the scale should start at zero, or an order of magnitude down from the lowest value
@@ -626,26 +633,26 @@ function drawTier2Graph(dater,dsType) {
 
 function createDTSDataSet(dset) {
     //wordlist of properties on the data record to retrieve.  Must be in the iorder that they appear on the record
-    
+
     var retDset = [];
-    
+
     $(dset).each(function (k, v) {
 
         var retRow = Array(13).join(".").split(".");
 
 
-        try { retRow[0] = v[keyWL[0]]; } catch (e) { retRow[0] = ""; }                                //"safetyreportid",   
-            
+        try { retRow[0] = v[keyWL[0]]; } catch (e) { retRow[0] = ""; }                                //"safetyreportid",
+
         $(v["patient"]["reaction"]).each(function (kEy, vAl) {  //"reactionmeddrapt"];
             retRow[1] += vAl[keyWL[1]] + ',';
-        });   
-            
+        });
+
         try {  retRow[2] = v["patient"][keyWL[2]];   } catch (e) { retRow[2] = ""; }      //  "patientweight"];
         try { retRow[7] = v["patient"][keyWL[7]];  } catch (e) { retRow[7] = ""; }          // "patientsex"];
 
         try { retRow[6] = v["patient"][keyWL[6]]; } catch (e) { retRow[6] = ""; } //  "patientonsetage"];
 
-        $(v["patient"]["drug"]).each(function (kEy, vAl) {  
+        $(v["patient"]["drug"]).each(function (kEy, vAl) {
 
 
             try { retRow[3] += vAl[keyWL[4]] + ":" + vAl[keyWL[3]] + ','; } catch (e) { retRow[3] = "";}          // "drugcharacterization"];
@@ -665,9 +672,9 @@ function createDTSDataSet(dset) {
 
         });
 
-        retDset.push(retRow);          
+        retDset.push(retRow);
     });
-       
+
 
     $('#tblcontainer').html('<table cellpadding="0" cellspacing="0" border="0" class="table table-striped table-bordered" id="example" ></table>');
 
@@ -693,7 +700,7 @@ function createDTSDataSet(dset) {
 					JSONToCSVConvertor(prepTableDataForExport($('#example').dataTable().api().data(),keyWLDataColumns), $('#tier2modalhead').text(), true);
 				})
 			);
-        },	
+        },
 		"sDom": "<'btnExportGrid'><'clear'><'box-content'<'col-sm-3'f><'col-sm-9 text-right dtlength'l><'clearfix'>>rt<'box-content'<'col-sm-6'i><'col-sm-6 text-right'p><'clearfix'>>"
     });
 }
@@ -730,70 +737,70 @@ function listAllProperties(o) {
 function JSONToCSVConvertor(JSONData, ReportTitle, ShowLabel) {
     //If JSONData is not an object then JSON.parse will parse the JSON string in an Object
     var arrData = typeof JSONData != 'object' ? JSON.parse(JSONData) : JSONData;
-    
-    var CSV = '';    
+
+    var CSV = '';
     //Set Report title in first row or line
-    
+
     CSV += ReportTitle + '\r\n\n';
 
     //This condition will generate the Label/Header
     if (ShowLabel) {
         var row = "";
-        
+
         //This loop will extract the label from 1st index of on array
         for (var index in arrData[0]) {
-            
+
             //Now convert each value to string and comma-seprated
             row += index + ',';
         }
 
         row = row.slice(0, -1);
-        
+
         //append Label row with line break
         CSV += row + '\r\n';
     }
-    
+
     //1st loop is to extract each row
     for (var i = 0; i < arrData.length; i++) {
         var row = "";
-        
+
         //2nd loop will extract each column and convert it in string comma-seprated
         for (var index in arrData[i]) {
             row += '"' + arrData[i][index] + '",';
         }
 
         row.slice(0, row.length - 1);
-        
+
         //add a line break after each row
         CSV += row + '\r\n';
     }
 
-    if (CSV == '') {        
+    if (CSV == '') {
         alert("Invalid data");
         return;
-    }   
-    
+    }
+
     //Generate a file name
     var fileName = "MyReport_";
     //this will remove the blank-spaces from the title and replace it with an underscore
-    fileName += ReportTitle.replace(/ /g,"_");   
-    
+    fileName += ReportTitle.replace(/ /g,"_");
+
     //Initialize file format you want csv or xls
     var uri = 'data:text/csv;charset=utf-8,' + escape(CSV);
-    
+
     // Now the little tricky part.
     // you can use either>> window.open(uri);
     // but this will not work in some browsers
-    // or you will not get the correct file extension    
-    
+    // or you will not get the correct file extension
+
     //this trick will generate a temp <a /> tag
-    var link = document.createElement("a");    
+    var link = document.createElement("a");
     link.href = uri;
-    
+
     //set the visibility hidden so it will not effect on your web-layout
     link.style = "visibility:hidden";
     link.download = fileName + ".csv";
-    
+
     //this part will append the anchor tag and remove it after automatic click
     document.body.appendChild(link);
     link.click();
@@ -806,12 +813,12 @@ function loadFrontPageChart() {
 
     var startdate = "2014-01-01";
     var enddate = "2014-06-03";
-    var dataspike = { date: "", count: 0 };   
+    var dataspike = { date: "", count: 0 };
     var targurl = ""
     var retdata = [];
     var sexdata = [];
     var agedata = [];
-    
+
     var sextext = " Affecting both sexes ";
     var agetext = " and all age groups ";
 
@@ -830,7 +837,7 @@ function loadFrontPageChart() {
         }
     });
 
-    targurl = apirooturl + "receivedate:[" + startdate + "+TO+" + enddate + "]&count=receivedate";    
+    targurl = apirooturl + "receivedate:[" + startdate + "+TO+" + enddate + "]&count=receivedate";
 
     //get all results for the last 6 months and find the most recent data spike of 50% or more.
     $.get(targurl, function (data) {
@@ -841,7 +848,7 @@ function loadFrontPageChart() {
             targurl = apirooturl + "receivedate:" + dataspike.date + "&count=patient.patientsex";
 
             $.get(targurl, function (data) {
-                
+
                 $(data.results).each(function (key, value) {
                     if (sexdata.length == 0 && value.term != 0) {
                         sexdata = [{ sex: value.term, count: value.count }];
@@ -859,7 +866,7 @@ function loadFrontPageChart() {
 
                 $.get(targurl, function (data) {
 
-                    // sort routine added by DVS 
+                    // sort routine added by DVS
                     var aged = data.results.sort(function (a, b) {
                         //Sort asc
                         return (a.term > b.term) ? 1 : ((a.term < b.term) ? -1 : 0);
@@ -870,7 +877,7 @@ function loadFrontPageChart() {
                         aged = bundleDataByType(aged, "AGE");
                     }
 
-                    //loop through the age brackets and see if the top two age brackets deviate by more than 50%, if so then there is a 
+                    //loop through the age brackets and see if the top two age brackets deviate by more than 50%, if so then there is a
                     //dominant age bracket. Else don't specify a dominant age bracket.
 
                     var topage = {term:"",count:0};
@@ -963,8 +970,8 @@ function loadFrontPageChart() {
                                 sub_total = value.count;
                             }
                         });
-                        
-                                                
+
+
                         targurl = "https://api.fda.gov/drug/enforcement.json?api_key="+apikey+"&search=(openfda.substance_name:\""+substances+"\")+AND+report_date:["+startdate+"+TO+"+enddate+"]";
                         $.get(targurl, function (data) {
 
@@ -976,7 +983,7 @@ function loadFrontPageChart() {
                                     $("#defPanel").text("The latest data spike is shown above for the date " + formatDate(dataspike.date) + ". " + sextext + agetext + ". " + substances);
                                 }
                             });
-                            
+
 
                         }, "json");
                     }, "json");
@@ -991,7 +998,7 @@ function drawDefaultGraph(data1,data2) {
 
     var options = {
         scaleBeginAtZero: true,
-        scaleShowGridLines: false,      
+        scaleShowGridLines: false,
         scaleGridLineColor: "rgba(0,0,0,.2)",
         scaleLineColor: "rgba(255,255,255,1.0)",
         scaleFontColor: "#fff",
@@ -1033,17 +1040,17 @@ function mostRecentDataSpike(incoming) {
             if (((value.count / avgVal) * 100) >= (150)) {
                 dataspike.date = value.time;
                 dataspike.count = value.count;
-            } 
-    }); 
+            }
+    });
 
     return dataspike;
 }
 
 
-/* 
+/*
  *   makeEmptyBundles is a helper function, designed to create a collection of
- *                    empty cells intended to assist bundling (grouping) 
-*                     data whose terms are best expressed as numbers.
+ *                    empty cells intended to assist bundling (grouping)
+ *                    data whose terms are best expressed as numbers.
  *                    For example, group ages by decades ("0-10","11-20", ... "81-90")
  *                                 or weights by 50 (pound) increments ("0-50","51-100", etc.)
  *   ------------------------------
@@ -1114,7 +1121,7 @@ function bundleDataByType(sortedIn, dsType) {
 
     if (dsType === "WEIGHT_KG") {
         //Pounds
-        return bundleData(sortedIn, 50);
+        return bundleData(sortedIn, 25);
     }
 
     //Otherwise... just return the input
