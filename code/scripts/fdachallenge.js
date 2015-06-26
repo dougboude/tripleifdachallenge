@@ -75,7 +75,7 @@ $(document).ready(function () {
         } catch (e) {
         }
 
-        //console.log(activeBars);
+        console.log(activeBars);
 
         if (activeBars.length > 0) {
             // alert('congrats! You chose ' + activeBars[0].label + ' (' + activeBars[0].value + ' occurrences)\ncheck out what we logged in the console for the details on what is available during a chart click');
@@ -284,7 +284,7 @@ function getTier2Data(selectedDate, drugname, reactionname, substancename) {
 function getTier2DataRaw(selectedDate, drugname, reactionname, substancename) {
 
     var qry = buildtier2Query(selectedDate, drugname, reactionname, substancename);
-
+console.log(qry);
     $.ajaxSetup({
         error: function (x, e) {
 
@@ -456,17 +456,6 @@ function fixUpFDADataTier2(incoming,dsType) {
     });
 
     return retval;
-}
-
-function formatDate(dval) {
-
-
-    var day = dval.replace(/-/ig, "").substr(6, 2).toString();
-    var month = dval.replace(/-/ig, "").substr(4, 2).toString();
-    var year = dval.replace(/-/ig, "").substr(0, 4).toString();
-
-
-    return month.toString() + "-" + day.toString() + "-" + year.toString();
 }
 
 function FDADate(dval) {
@@ -775,44 +764,55 @@ function JSONToCSVConvertor(JSONData, ReportTitle, ShowLabel) {
 }
 
 function timeGroup(dater,groupby){
-//elem.time = 20100501
 	var retval = [];
 	var getKey = function getKey(string,start,stop){return string.substring(start,stop);};
 	var thiskey = "";
 	var lastkey = "";
 	var aggVal = 0;
-	console.log(dater);
-	switch(groupby){
-		case 'day':
-		//return dater as is
-			return dater;
-		break;
-		case 'week':
-		
-		break;
-		case 'month':
-			//aggregating by year/month
-			start = 0;
-			stop = 6;
-		break;
-		case 'year':
-			//aggregating by year
-			start = 0;
-			stop = 4;
-		break;
-		default:
-			console.log('hit default. groupby is ' + groupby);
-		break;
+	var tmpdate = "";
+
+	if(groupby == "day"){
+		return dater;
 	}
 	
+	//aggregating dater by the user's selection. Will return the transformed dater as 'retval'
+	//basic approach is: based on how we want to aggregate, create a proper unique key value per record. For records in
+	//the same group, the key will be the same. At key change, we'll reset our aggVal sum to 0 and start summing again
+	//for the next group.
+	//assumption is that the incoming dater is already in date order.
 	
 	$(dater).each(function(key,value){
-		thiskey = getKey(value.time,start,stop);
-		lastkey = (lastkey == "")?thiskey:lastkey;
-		//console.log('thiskey: ' + thiskey + ' lastkey: ' + lastkey + ' thisval:' + value.count + ' aggval: ' + aggVal + ' key: ' + key + ' daterlength: ' + dater.length);
+		thiskey = "";
+		//create a date object from this record's time value
+		tmpdate = new Date(value.time.substring(0,4),(parseInt(value.time.substring(4,6))-1).toString(),value.time.substring(6,8),0,1,0,0);
+
+		switch(groupby){//we'll create a new group key based on what kind of aggregation we're doing...
+			case 'week':
+				thisweek = $.datepicker.iso8601Week(tmpdate);
+				//a little week fixing up because frickin iso8601 begins its weeks in a funky spot, sometimes rendering the first few days of January in the PRIOR YEAR'S LAST WEEK! bogus.
+				if(tmpdate.getMonth() == 0 && thisweek > 5){thisweek = 1};
+				//create our group value key
+				thiskey = 'Week ' + thisweek + ' of ' + value.time.substring(0,4);
+			break;
+			case 'month':
+				//aggregating by year/month
+				thiskey = $.datepicker.formatDate("M",tmpdate) + ' of ' + value.time.substring(0,4);
+			break;
+			case 'year':
+				//aggregating by year
+				thiskey = value.time.substring(0,4);
+			break;
+			default:
+				console.log('hit default. groupby is ' + groupby);
+				return;
+			break;
+		}
+		
+		//group key all made! Let's start tracking key values vs iterations.
+		lastkey = (lastkey == "")?thiskey:lastkey;//on our very first pass, lastkey will be blank...so grab thiskey value!
 
 		//do we push this object on to the stack, or go around again?
-		if(thiskey != lastkey || key == dater.length-1){
+		if(thiskey != lastkey || key == dater.length-1){//either the key value changed since last iteration, OR we're at the end of our dater set
 			aggVal += value.count;
 			retval.push({count : aggVal, time: lastkey});
 			aggVal = 0;
@@ -820,8 +820,21 @@ function timeGroup(dater,groupby){
 			aggVal += value.count;
 		}
 		
+		//our current key will become our lastkey in our next iteration, so capture it!
 		lastkey = thiskey;
 	});
-	//console.log(retval);
+
 	return retval;
+}
+
+/* modified by Doug */
+function formatDate(dval) {
+	var retval = dval;
+	if (dval.length == 8 && parseInt(dval) != NaN) {//if the value passed in isn't yyyymmdd, just return it as is
+		var day = dval.replace(/-/ig, "").substr(6, 2).toString();
+		var month = dval.replace(/-/ig, "").substr(4, 2).toString();
+		var year = dval.replace(/-/ig, "").substr(0, 4).toString();
+		retval = month.toString() + "-" + day.toString() + "-" + year.toString();
+	}
+    return retval;
 }
