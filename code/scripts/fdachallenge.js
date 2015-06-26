@@ -318,7 +318,7 @@ function buildtier2Query(selectedDate, drugname, reactionname, substancename){
     var substance = "";
 	var receivedDate = "";
 
-	if(selectedDate.split("-") == 3){
+	if(selectedDate.split("-").length == 3){
 		//this is a single date. Query for data on that date alone
 		sDate = FDADate(selectedDate);
 	} else {
