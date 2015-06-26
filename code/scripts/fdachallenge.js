@@ -1,9 +1,11 @@
 var apikey = "z0wwT73I3DtNL8cxr3VUc7shQsESx0MPIyuTYQv9";
 var apirooturl = "https://api.fda.gov/drug/event.json?api_key=" + apikey + "&search=";
-var myBarChart = ""; //setting a global variable so we can access our chart from any function
 
 var activeBars = {};
+
 var tier2chart = "";
+var myBarChart = ""; //setting a global variable so we can access our chart from any function
+var defChart1 = "", defChart2 = "";
 
 var keyWL = ["safetyreportid", "reactionmeddrapt", "patientweight", "drugcharacterization", "medicinalproduct","drugdosagetext", "patientonsetage", "patientsex", "route", "pharm_class_epc", "generic_name"];
 
@@ -25,9 +27,9 @@ $(document).ready(function () {
     //on page load
     //instantiate tool tips
     $("[data-toggle='tooltip']").tooltip();
-
-    //hide results row
-    hideResultsRow();
+    
+    //load default analysis chart
+    loadFrontPageChart();
     
     $('#chartdiv').hide();
 
@@ -108,12 +110,8 @@ $(document).ready(function () {
     $('#btnBuildGraph').click(function () {
         getSpecificItemData($('#selSpecificProducts').val());
     });
-
-
-
-
+    
     ///MODAL FUNCTIONS
-
 
     $("#tier2modal").on('shown.bs.modal', function () {
 
@@ -125,6 +123,7 @@ $(document).ready(function () {
        
        
     });
+
     $("#tier2modal").on('hidden.bs.modal', function () {
 
         $('input[name=ChartType]').each(function(){
@@ -138,15 +137,10 @@ $(document).ready(function () {
 
     });
 
+
+
 });
 	
-function hideResultsRow(){
-	$('#dResultsRow').hide();
-}
-
-function showResultsRow(){
-	$('#dResultsRow').show();
-}
 
 function popResultsSelect(products){
 	//clear the select's current options
@@ -236,9 +230,9 @@ function getEventsByDate(startdate, enddate, drugname,reactionname,substancename
                 AlertDialog('Error!', 'No Data Found.  Please refine your search parameters and try again.');
 
             } else if (x.status == 500) {
-                AlertDialog('Error!', 'Internel Server Error.');
+                AlertDialog('Error!', 'Internal Server Error.');
             } else {
-                AlertDialog('Error!', 'Unknow Error.\n' + x.responseText);
+                AlertDialog('Error!', 'Unknown Error.\n' + x.responseText);
             }
         }
     });
@@ -413,15 +407,22 @@ function fixUpFDADataTier2(incoming,dsType) {
 			}
         ]
     };
+    
 
     /* 20150624 sort routine added by DVS */
     if (incoming && incoming.length > 1) {
-	if (dsType === "WEIGHT" || dsType === "AGE") {
-	    incoming = incoming.sort(function(a, b) {
-                 //Sort asc
-                 return (a.term > b.term) ? 1 : ((a.term < b.term) ? -1 : 0);
-	    });
-	}
+        if (dsType === "WEIGHT" || dsType === "WEIGHT_KG" || dsType === "AGE") {
+            incoming = incoming.sort(function (a, b) {
+                //Sort asc
+                return (a.term > b.term) ? 1 : ((a.term < b.term) ? -1 : 0);
+            });
+
+            //Next step added 20150625 by DVS -- group items
+            if (incoming.length > 5) {
+                incoming = bundleDataByType(incoming, dsType);
+                dsType = "BUNDLED_" + dsType;
+            }
+        }
     }
 
 
@@ -772,4 +773,325 @@ function JSONToCSVConvertor(JSONData, ReportTitle, ShowLabel) {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+}
+
+function loadFrontPageChart() {
+    //this function runs the logic to build the most recent data spike preview for the front page
+    // we use a 50% threshold for the data spike detection logic.
+
+    var startdate = "2014-01-01";
+    var enddate = "2014-06-03";
+    var dataspike = { date: "", count: 0 };   
+    var targurl = ""
+    var retdata = [];
+    var sexdata = [];
+    var agedata = [];
+    
+    var sextext = " Affecting both sexes ";
+    var agetext = " and all age groups ";
+
+    $.ajaxSetup({ // ajax error setup
+        error: function (x, e) {
+            if (x.status == 0) {
+                AlertDialog('Error!', 'Cannot access FDA Data Web Service. Please Check Your Network Settings and Internet Availability.');
+            }
+            else if (x.status == 404) {
+                AlertDialog('Error!', 'No Data Found.  Please refine your search parameters and try again.');
+            } else if (x.status == 500) {
+                AlertDialog('Error!', 'Internel Server Error.');
+            } else {
+                AlertDialog('Error!', 'Unknow Error.\n' + x.responseText);
+            }
+        }
+    });
+
+    targurl = apirooturl + "receivedate:[" + startdate + "+TO+" + enddate + "]&count=receivedate";    
+
+    //get all results for the last 6 months and find the most recent data spike of 50% or more.
+    $.get(targurl, function (data) {
+        dataspike = mostRecentDataSpike(data.results);
+
+            //find the most affected gender, if no primary gender is affected then we say both, which is 0.  male = 1, female = 2
+            //the criteria for determining a primary affected sex group would be a group that is double of what other groups are.
+            targurl = apirooturl + "receivedate:" + dataspike.date + "&count=patient.patientsex";
+
+            $.get(targurl, function (data) {
+                
+                $(data.results).each(function (key, value) {
+                    if (sexdata.length == 0 && value.term != 0) {
+                        sexdata = [{ sex: value.term, count: value.count }];
+                    } else if (value.count >= (sexdata[0].count * 2) && value.term != 0) {
+                        sextext = " primarily affecting " + (value.term == 1 ? "Males " : "Females ");
+                        sexdata = [{ sex: value.term, count: value.count }];
+                    } else if (value.term != 0) {
+                        sexdata = [{ sex: sexdata[0].sex, count: sexdata[0].count }, { sex: value.term, count: value.count }];
+                    }
+                });
+
+                //find the most affected age group, if no primary age group is affected then we include the top 2,3,4,etc. age groups.
+                //the criteria for determining an affected age group would be a group that is double of what other groups are.
+                targurl = apirooturl + "receivedate:" + dataspike.date + "&count=patient.patientonsetage";
+
+                $.get(targurl, function (data) {
+
+                    // sort routine added by DVS 
+                    var aged = data.results.sort(function (a, b) {
+                        //Sort asc
+                        return (a.term > b.term) ? 1 : ((a.term < b.term) ? -1 : 0);
+                    });
+
+                    // group items
+                    if (aged.length > 5) {
+                        aged = bundleDataByType(aged, "AGE");
+                    }
+
+                    //loop through the age brackets and see if the top two age brackets deviate by more than 50%, if so then there is a 
+                    //dominant age bracket. Else don't specify a dominant age bracket.
+
+                    var topage = {term:"",count:0};
+                    var top2age = { term: "", count: 0 };
+
+                    $(aged).each(function (key, value) {
+                        if (topage.count == 0) {
+                            topage.count = value.count;
+                            topage.term = value.term;
+                        } else {
+                            if (top2age.count == 0) {
+                                top2age.count = value.count;
+                                top2age.term = value.term;
+                            } else {
+                                if (value.count > topage.count) {
+                                    top2age = topage;
+                                    topage.count = value.count;
+                                    topage.term = value.term;
+                                }
+                            }
+                        }
+                    });
+
+                    if (topage.count >= (top2age.count * 2)) {
+                        agedata = topage;
+                        agetext = " and the " + topage.term + " age group ";
+                    } else {
+                        agedata = aged;
+                    }
+
+
+                    // datasets for chart
+                    var retval1 = {
+                        toolTipLabels: [],
+                        labels: [],
+                        datasets: [
+                            {
+                                label: "data",
+                                fillColor: "rgba(153,255,153,0.5)",
+                                strokeColor: "rgba(153,255,153,0.8)",
+                                highlightFill: "rgba(153,255,153,0.75)",
+                                highlightStroke: "rgba(153,255,153,1)",
+                                data: []
+                            }
+                        ]
+                    };
+
+                    // datasets for chart
+                    var retval2 = {
+                        toolTipLabels: [],
+                        labels: [],
+                        datasets: [
+                            {
+                                label: "data",
+                                fillColor: "rgba(153,255,153,0.5)",
+                                strokeColor: "rgba(153,255,153,0.8)",
+                                highlightFill: "rgba(153,255,153,0.75)",
+                                highlightStroke: "rgba(153,255,153,1)",
+                                data: []
+                            }
+                        ]
+                    };
+
+                    $(agedata).each(function (key, value) {
+                        retval1.labels.push(value.term);
+                        retval1.toolTipLabels.push(value.term + " : " + value.count);
+                        retval1.datasets[0].data.push(value.count);
+                    });
+
+                    $(sexdata).each(function (key, value) {
+                        var s = (value.sex == 1 ? "Male" : "Female");
+                        retval2.labels.push(s);
+                        retval2.toolTipLabels.push(s + " : " + value.count);
+                        retval2.datasets[0].data.push(value.count);
+                    });
+
+                    drawDefaultGraph(retval1, retval2);
+
+
+                    targurl = apirooturl + "receivedate:" + dataspike.date + "&count=patient.drug.openfda.substance_name.exact";
+                    $.get(targurl, function (data) {
+
+                    var substancedata = [];
+                    var sub_total = 0;
+                    var substances = "";
+
+                        $(data.results).each(function (key, value) {
+                            if(key==0){
+                                substances += "" + value.term + "";
+                                sub_total = value.count;
+                            }
+                        });
+                        
+                                                
+                        targurl = "https://api.fda.gov/drug/enforcement.json?api_key="+apikey+"&search=(openfda.substance_name:\""+substances+"\")+AND+report_date:["+startdate+"+TO+"+enddate+"]";
+                        $.get(targurl, function (data) {
+
+
+                            $(data.results).each(function (key, value) {
+                                if (value["openfda"]["substance_name"].join().indexOf(substances) > -1) {
+                                    substances = " The most prominent substances involved in the reaction spike is " + substances + " with " + sub_total + " reactions.  " + substances +
+                                        " has had a recent recall on " + formatDate(value.report_date);
+                                    $("#defPanel").text("The latest data spike is shown above for the date " + formatDate(dataspike.date) + ". " + sextext + agetext + ". " + substances);
+                                }
+                            });
+                            
+
+                        }, "json");
+                    }, "json");
+                }, "json");
+            }, "json");
+    }, "json");
+
+
+}
+
+function drawDefaultGraph(data1,data2) {
+
+    var options = {
+        scaleBeginAtZero: true,
+        scaleShowGridLines: false,      
+        scaleGridLineColor: "rgba(0,0,0,.2)",
+        scaleLineColor: "rgba(255,255,255,1.0)",
+        scaleFontColor: "#fff",
+        scaleFontSize: 14,
+        scaleFontStyle: "normal",
+        scaleGridLineWidth: 1,
+        scaleShowHorizontalLines: true,
+        scaleShowVerticalLines: true,
+        barShowStroke: true,
+        barStrokeWidth: 5,
+        barValueSpacing: 5,
+        barDatasetSpacing: 10,
+        legendTemplate: "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<datasets.length; i++){%><li><span style=\"background-color:<%=datasets[i].fillColor%>\"></span><%if(datasets[i].label){%><%=datasets[i].label%><%}%></li><%}%></ul>"
+    }
+
+    //setup chart
+    $("#chartTarg").css("width", "500px");
+    $("#chartTarg").css("height", "250px");
+    //instantiate our chart canvas
+    defChart1 = new Chart($("#defChart1").get(0).getContext("2d")).Bar(data1, options);
+    defChart2 = new Chart($("#defChart2").get(0).getContext("2d")).Bar(data2, options);
+}
+
+function mostRecentDataSpike(incoming) {
+
+    //find most recent data spike in dataset provided range
+    //for the front page purposes we work with a 50% spike threshold
+
+    var avgVal = 0;
+    var dataspike = { date: "", count: 0 };
+
+    $(incoming).each(function (key, value) {
+        avgVal += value.count;
+    });
+
+    avgVal = Math.round(avgVal / $(incoming).length);
+
+    $(incoming).each(function (key, value) {
+            if (((value.count / avgVal) * 100) >= (150)) {
+                dataspike.date = value.time;
+                dataspike.count = value.count;
+            } 
+    }); 
+
+    return dataspike;
+}
+
+
+/* 
+ *   makeEmptyBundles is a helper function, designed to create a collection of
+ *                    empty cells intended to assist bundling (grouping) 
+*                     data whose terms are best expressed as numbers.
+ *                    For example, group ages by decades ("0-10","11-20", ... "81-90")
+ *                                 or weights by 50 (pound) increments ("0-50","51-100", etc.)
+ *   ------------------------------
+ *   PARAMETERS
+ *        maxMagnitude     --  int  :  the largest value in the sorted range
+ *                                     to be bundled;  e.g. 83 or 83.6
+ *        groupsOf         --  int  :  a divisor;  e.g. group by 10s, or 50s, or 100s...
+ *   ------------------------------
+ *   RETURNS
+ *        A container array large enough to hold a range of values up to and including maxMagnitude.
+ *        Cells in this array will contain these fields:
+ *              term  :  a string label, e.g. "0-10", or "11-20", or "50-100"
+ *             count  :  number of items that fall into this group; based on the
+ *                       expectation that the source data to be sorted will have
+ *                       its own count for more discrete, pre-bundled data units.
+ *          component :  an empty array, intended to store copies of the original data
+ *                       units to be bundled
+ */
+function makeEmptyBundles(maxMagnitude, groupsOf) {
+    var bundled = [],
+        maxCells = Math.ceil(maxMagnitude / groupsOf),  //e.g. group by decades, or by 50 lb increments, etc.
+        index = 0,
+        x = 0;
+
+    while (x < maxCells) {
+        var newItem = new Object();
+        newItem.term = (x === 0) ? '0' : (((x * groupsOf) + 1) + '');
+        newItem.term = newItem.term + '-' + (((x + 1) * groupsOf) + '');  //Now, label is a string range; e.g. "0-10", "11-20", etc.
+        newItem.count = 0;
+        newItem.component = [];
+
+        bundled.push(newItem);
+        x = x + 1;
+    }
+
+    return bundled;
+}
+
+
+function bundleData(sortedIn, groupsOf) {
+    var bundled = [];
+    var maxInput = Math.round(parseFloat(sortedIn[sortedIn.length - 1].term));
+    var x = 0, magnitude = 0.0, index = 0, maxCells = 0;  //Initialization
+
+    bundled = makeEmptyBundles(maxInput, groupsOf);
+
+    //Having now defined the cells to store our bundles, now we need to aggregate
+    $(sortedIn).each(function (key, value) {
+        magnitude = Math.round(parseFloat(value.term));
+        index = (magnitude < 1.0) ? 0 : Math.floor((magnitude - 1) / groupsOf);
+        bundled[index].count += value.count;
+        bundled[index].component.push(value);
+    });
+
+    return bundled;
+}
+
+function bundleDataByType(sortedIn, dsType) {
+
+    if (dsType === "AGE") {
+        return bundleData(sortedIn, 10);
+    }
+
+    if (dsType === "WEIGHT") {
+        //Pounds
+        return bundleData(sortedIn, 50);
+    }
+
+    if (dsType === "WEIGHT_KG") {
+        //Pounds
+        return bundleData(sortedIn, 50);
+    }
+
+    //Otherwise... just return the input
+    return sortedIn;
 }
