@@ -7,7 +7,7 @@ var tier2chart = "";
 
 var keyWL = ["safetyreportid", "reactionmeddrapt", "patientweight", "drugcharacterization", "medicinalproduct","drugdosagetext", "patientonsetage", "patientsex", "route", "pharm_class_epc", "generic_name"];
 
-var keyWLDataColumns = [    
+var keyWLDataColumns = [
     { "title": "safetyreportid", "defaultContent": "" },
     { "title": "reactionmeddrapt", "defaultContent": "" },
     { "title": "patientweight", "defaultContent": "" },
@@ -28,7 +28,7 @@ $(document).ready(function () {
 
     //hide results row
     hideResultsRow();
-    
+
     $('#chartdiv').hide();
 
     //enable the search button
@@ -37,7 +37,7 @@ $(document).ready(function () {
 
         $('#defaultdiv').hide();
         $('#chartdiv').show();
-        
+
 
         try {
             myBarChart.clear();
@@ -48,7 +48,7 @@ $(document).ready(function () {
         if (!$('#startDate').val().match(/^$/) && !$('#endDate').val().match(/^$/)) {
             getEventsByDate($('#startDate').val(), $('#endDate').val(), $('#iDrug').val(), $('#selreaction').val(), $('#subname').val());
         } else {
-            AlertDialog("Required Field", "Please supply a start and end date for your search. :-)");
+            AlertDialog("Required Field", "Please supply a start and end date for your search.");
         }
 
     });
@@ -62,13 +62,13 @@ $(document).ready(function () {
         } catch (e) { }
 
         getTier2Data($('#selectedDate').val(), $('#iDrug').val(), $('#selreaction').val(), $('#subname').val());
-        
+
 
     });
 
     //enable chart canvas to watch for user clicks
     $('#chartTarg').click(function (evt) {
-        
+
 
         try {
             activeBars = myBarChart.getBarsAtEvent(evt);
@@ -122,8 +122,8 @@ $(document).ready(function () {
 
         getTier2DataRaw($('#selectedDate').val(), $('#iDrug').val(), $('#selreaction').val(), $('#subname').val());
 
-       
-       
+
+
     });
     $("#tier2modal").on('hidden.bs.modal', function () {
 
@@ -139,33 +139,33 @@ $(document).ready(function () {
     });
 
 });
-	
+
 function hideResultsRow(){
-	$('#dResultsRow').hide();
+        $('#dResultsRow').hide();
 }
 
 function showResultsRow(){
-	$('#dResultsRow').show();
+        $('#dResultsRow').show();
 }
 
 function popResultsSelect(products){
-	//clear the select's current options
-	$('#selSpecificProducts > option').remove();
-	//console.log(products);
-	//build new options
-	$(products).each( function(key,value){
-		$('#selSpecificProducts')
-			.append($("<option></option>")
-         	.attr("value",value.term)
-         	.text(value.term));
-	});
+        //clear the select's current options
+        $('#selSpecificProducts > option').remove();
+        //console.log(products);
+        //build new options
+        $(products).each( function(key,value){
+                $('#selSpecificProducts')
+                        .append($("<option></option>")
+                 .attr("value",value.term)
+                 .text(value.term));
+        });
 }
 
 function populateReactionSelect(reactions) {
 
     var persistSel = "";
 
-    if ($('#selreaction').val() != null && $('#selreaction').val() != "") {
+    if ($('#selreaction').val() !== null && $('#selreaction').val() !== "") {
         persistSel = $('#selreaction').val();
     }
     //clear the select's current options
@@ -179,9 +179,9 @@ function populateReactionSelect(reactions) {
 
     $(reactions).each(function (key, value) {
         $('#selreaction')
-			.append($("<option></option>")
-         	.attr("value", value.term)
-         	.text(value.term));
+                        .append($("<option></option>")
+                 .attr("value", value.term)
+                 .text(value.term));
     });
 
     $('#selreaction').val(persistSel);
@@ -189,18 +189,18 @@ function populateReactionSelect(reactions) {
 }
 
 function getDrugNames(drugname){
-	var targurl = apirooturl + "generic_name:" + drugname + "&count=patient.drug.openfda.brand_name.exact";
-	//targurl = apirooturl + "generic_name:" + drugname + "&limit=50";
-	console.log('url to get generic item list:' + targurl);
-	$.get(targurl,function(data) {
-	        //console.log(data);
-			if(data.error){//this doesn't work. will need to do error checking another way, probably leveraging the xhr object which has sweet methods like 'fail', etc.
-				alert(data.error.message);
-				return;
-			}
-			popResultsSelect(data.results);
-			showResultsRow();
-	    }, "json" );
+        var targurl = apirooturl + "generic_name:" + drugname + "&count=patient.drug.openfda.brand_name.exact";
+        //targurl = apirooturl + "generic_name:" + drugname + "&limit=50";
+        console.log('url to get generic item list:' + targurl);
+        $.get(targurl,function(data) {
+                //console.log(data);
+                        if(data.error){//this doesn't work. will need to do error checking another way, probably leveraging the xhr object which has sweet methods like 'fail', etc.
+                                alert(data.error.message);
+                                return;
+                        }
+                        popResultsSelect(data.results);
+                        showResultsRow();
+            }, "json" );
 }
 
 function getEventsByDate(startdate, enddate, drugname,reactionname,substancename) {
@@ -220,7 +220,7 @@ function getEventsByDate(startdate, enddate, drugname,reactionname,substancename
         substance = "(substance_name:" + substancename.toUpperCase() + ")+AND+";
     }
 
-    if (reactionname!=null && !reactionname.match(/^$/)) {
+    if (reactionname !== null && !reactionname.match(/^$/)) {
         reaction = "(patient.reaction.reactionmeddrapt:" + reactionname + ")+AND+";
     }
 
@@ -229,16 +229,16 @@ function getEventsByDate(startdate, enddate, drugname,reactionname,substancename
     $.ajaxSetup({
         error: function (x, e) {
 
-            if (x.status == 0) {
-                AlertDialog('Error!', ' Check Your Network.');
+            if (x.status === 0) {
+                AlertDialog('Error!', 'Check Your Network.');
             }
-            else if (x.status == 404) {
+            else if (x.status === 404) {
                 AlertDialog('Error!', 'No Data Found.  Please refine your search parameters and try again.');
 
-            } else if (x.status == 500) {
-                AlertDialog('Error!', 'Internel Server Error.');
+            } else if (x.status === 500) {
+                AlertDialog('Error!', 'Internal Server Error.');
             } else {
-                AlertDialog('Error!', 'Unknow Error.\n' + x.responseText);
+                AlertDialog('Error!', 'Unknown Error.\n' + x.responseText);
             }
         }
     });
@@ -247,7 +247,7 @@ function getEventsByDate(startdate, enddate, drugname,reactionname,substancename
 
     $.get(targurl + "&count=patient.reaction.reactionmeddrapt.exact", function (data) { populateReactionSelect(data.results); }, "json");
 
-    $("#charttitle").text(reactionname + " reactions for " + ((drugname + substancename == "") ? "ALL DRUGS" : drugname + " " + substancename) + " between " + startdate + " thru " + enddate);
+    $("#charttitle").text(reactionname + " reactions for " + ((drugname + substancename === "") ? "ALL DRUGS" : drugname + " " + substancename) + " between " + startdate + " thru " + enddate);
     $("#charttitlenote").text("NOTE: data spikes are in red");
 
     console.log(targurl + "&count=receivedate");
@@ -261,16 +261,16 @@ function getTier2Data(selectedDate, drugname, reactionname, substancename) {
     $.ajaxSetup({
         error: function (x, e) {
 
-            if (x.status == 0) {
-                AlertDialog('Error!', ' Check Your Network.');
+            if (x.status === 0) {
+                AlertDialog('Error!', 'Check Your Network.');
             }
-            else if (x.status == 404) {
+            else if (x.status === 404) {
                 AlertDialog('Error!', 'No Data Found.  Please refine your search parameters and try again.');
 
-            } else if (x.status == 500) {
-                AlertDialog('Error!', 'Internel Server Error.');
+            } else if (x.status === 500) {
+                AlertDialog('Error!', 'Internal Server Error.');
             } else {
-                AlertDialog('Error!', 'Unknow Error.\n' + x.responseText);
+                AlertDialog('Error!', 'Unknown Error.\n' + x.responseText);
             }
         }
     });
@@ -288,16 +288,16 @@ function getTier2DataRaw(selectedDate, drugname, reactionname, substancename) {
     $.ajaxSetup({
         error: function (x, e) {
 
-            if (x.status == 0) {
-                AlertDialog('Error!', ' Check Your Network.');
+            if (x.status === 0) {
+                AlertDialog('Error!', 'Check Your Network.');
             }
-            else if (x.status == 404) {
+            else if (x.status === 404) {
                 AlertDialog('Error!', 'No Data Found.  Please refine your search parameters and try again.');
 
-            } else if (x.status == 500) {
-                AlertDialog('Error!', 'Internel Server Error.');
+            } else if (x.status === 500) {
+                AlertDialog('Error!', 'Internal Server Error.');
             } else {
-                AlertDialog('Error!', 'Unknow Error.\n' + x.responseText);
+                AlertDialog('Error!', 'Unknown Error.\n' + x.responseText);
             }
         }
     });
@@ -324,7 +324,7 @@ function buildtier2Query(selectedDate, drugname, reactionname, substancename){
         substance = "(substance_name:" + substancename + ")+AND+";
     }
 
-    if (reactionname != null && !reactionname.match(/^$/)) {
+    if (reactionname !== null && !reactionname.match(/^$/)) {
         reaction = "(patient.reaction.reactionmeddrapt:" + reactionname + ")+AND+";
     }
 
@@ -332,69 +332,69 @@ function buildtier2Query(selectedDate, drugname, reactionname, substancename){
 }
 
 function getSpecificItemData(target){
-	//console.log('going after this target: ' + target);
-	var targurl = apirooturl + "patient.drug.openfda.brand_name:" + target + "&limit=50&count=patient.reaction.reactionmeddrapt.exact";
-	//targurl = apirooturl + "generic_name:" + drugname + "&limit=50";
-	console.log('url to get specific item reaction data:' + targurl);
-	$.get(targurl,function(data) {
-	        //console.log(data.results);
-			drawGraph(data.results);
-	    }, "json" );
+        //console.log('going after this target: ' + target);
+        var targurl = apirooturl + "patient.drug.openfda.brand_name:" + target + "&limit=50&count=patient.reaction.reactionmeddrapt.exact";
+        //targurl = apirooturl + "generic_name:" + drugname + "&limit=50";
+        console.log('url to get specific item reaction data:' + targurl);
+        $.get(targurl,function(data) {
+                //console.log(data.results);
+                        drawGraph(data.results);
+            }, "json" );
 }
 
 function fixUpFDAData(incoming) {
     var avgVal = 0;
 
-    $(incoming).each(function (key, value) {       
+    $(incoming).each(function (key, value) {
         avgVal += value.count;
     });
-    avgVal = Math.round( avgVal / $(incoming).length ); 
+    avgVal = Math.round( avgVal / $(incoming).length );
 
     var retval = {
         toolTipLabels: [],
-		labels:[],
-		datasets:[
-			{
-				label:"data",
-	            fillColor: "rgba(153,255,153,0.5)",
-	            strokeColor: "rgba(153,255,153,0.8)",
-	            highlightFill: "rgba(153,255,153,0.75)",
-	            highlightStroke: "rgba(153,255,153,1)",
-	            data: []
-			},
+                labels:[],
+                datasets:[
+                        {
+                                label:"data",
+                    fillColor: "rgba(153,255,153,0.5)",
+                    strokeColor: "rgba(153,255,153,0.8)",
+                    highlightFill: "rgba(153,255,153,0.75)",
+                    highlightStroke: "rgba(153,255,153,1)",
+                    data: []
+                        },
             {
-				label:"spikes",
-				fillColor: "rgba(255,51,51,0.5)",
-				strokeColor: "rgba(255,51,51,0.8)",
-				highlightFill: "rgba(255,51,51,0.75)",
-				highlightStroke: "rgba(255,51,51,1)",
-	            data: []
-			}
-		]
-	    };
+                                label:"spikes",
+                                fillColor: "rgba(255,51,51,0.5)",
+                                strokeColor: "rgba(255,51,51,0.8)",
+                                highlightFill: "rgba(255,51,51,0.75)",
+                                highlightStroke: "rgba(255,51,51,1)",
+                    data: []
+                        }
+                ]
+            };
 
-	    $(incoming).each(function (key, value) {
+            $(incoming).each(function (key, value) {
 
-	        retval.labels.push((value.term == undefined ? formatDate(value.time) : value.term));
-	        retval.toolTipLabels.push((value.term == undefined ? (value.count + " reactions on " + formatDate(value.time) + " ") : value.term));
-	        //( " + Math.round((value.count / avgVal) * 100).toString() + "% of the average " + avgVal.toString() + " for the period " + formatDate($('#startDate').val()) + " TO " + formatDate($('#endDate').val()) + ") 
-	        
-	        if( parseInt($('#spikepct').val()) > 0  ){
-	            if (((value.count / avgVal) * 100) >= (parseInt($('#spikepct').val()) + 100) ) {
-	                retval.datasets[1].data.push(value.count);
-	            } else {
-	                retval.datasets[1].data.push(0);
-	            }
-	        }
+                retval.labels.push(value.term === undefined ? formatDate(value.time) : value.term);
+                retval.toolTipLabels.push(value.term === undefined ? (value.count + " reactions on " + formatDate(value.time) + " ") : value.term);
+                //( " + Math.round((value.count / avgVal) * 100).toString() + "% of the average " + avgVal.toString() + " for the period " + formatDate($('#startDate').val()) + " TO " + formatDate($('#endDate').val()) + ")
 
-	        if (!$('#toggleSpikes')[0].checked) {
-	            retval.datasets[0].data.push(value.count);
-	        } else {
-	            retval.datasets[0].data.push(0);
-	        }
+                if( parseInt($('#spikepct').val()) > 0  ){
+                    if (((value.count / avgVal) * 100) >= (parseInt($('#spikepct').val()) + 100) ) {
+                        retval.datasets[1].data.push(value.count);
+                    } else {
+                        retval.datasets[1].data.push(0);
+                    }
+                }
 
-	    });
-	return retval;
+                if (!$('#toggleSpikes')[0].checked) {
+                    retval.datasets[0].data.push(value.count);
+                } else {
+                    retval.datasets[0].data.push(0);
+                }
+
+            });
+        return retval;
 }
 
 function fixUpFDADataTier2(incoming,dsType) {
@@ -403,31 +403,31 @@ function fixUpFDADataTier2(incoming,dsType) {
         toolTipLabels: [],
         labels: [],
         datasets: [
-			{
-			    label: "data",
-			    fillColor: "rgba(153,255,153,0.5)",
-			    strokeColor: "rgba(153,255,153,0.8)",
-			    highlightFill: "rgba(153,255,153,0.75)",
-			    highlightStroke: "rgba(153,255,153,1)",
-			    data: []
-			}
+                        {
+                            label: "data",
+                            fillColor: "rgba(153,255,153,0.5)",
+                            strokeColor: "rgba(153,255,153,0.8)",
+                            highlightFill: "rgba(153,255,153,0.75)",
+                            highlightStroke: "rgba(153,255,153,1)",
+                            data: []
+                        }
         ]
     };
 
     /* 20150624 sort routine added by DVS */
     if (incoming && incoming.length > 1) {
-	if (dsType === "WEIGHT" || dsType === "WEIGHT_KG" || dsType === "AGE") {
-	    incoming = incoming.sort(function(a, b) {
+        if (dsType === "WEIGHT" || dsType === "WEIGHT_KG" || dsType === "AGE") {
+            incoming = incoming.sort(function(a, b) {
                  //Sort asc
                  return (a.term > b.term) ? 1 : ((a.term < b.term) ? -1 : 0);
-	    });
+            });
 
             //Next step added 20150625 by DVS -- group items
             if (incoming.length > 5) {
                if (dsType === "WEIGHT") {
                    //Expect that source data is weight in kilograms.  Convert Kgs to lbs
                    $(incoming).each(function (key, value) {
-                      value.term = Math.round( parseFloat( value.term) * 2.20462  )
+                      value.term = Math.round( parseFloat( value.term) * 2.20462  );
                    });
                }
 
@@ -435,31 +435,31 @@ function fixUpFDADataTier2(incoming,dsType) {
                 incoming = bundleDataByType(incoming, dsType);
                 dsType = "BUNDLED_" + dsType;
             }
-	}
+        }
     }
 
 
     $(incoming).each(function (key, value) {
-      
-        if (dsType == "SEX") {
+
+        if (dsType === "SEX") {
 
             retval.labels.push(value.term.toString().replace("0","Unknown").replace("1","Male").replace("2","Female") );
             retval.toolTipLabels.push(value.term.toString().replace("0", "Unknown").replace("1", "Male").replace("2", "Female"));
             retval.datasets[0].data.push(value.count);
 
-        } else if (dsType == "WEIGHT_KG") {
+        } else if (dsType === "WEIGHT_KG") {
 
-            retval.labels.push(Math.round( parseFloat( value.term)));  
+            retval.labels.push(Math.round( parseFloat( value.term)));
             retval.toolTipLabels.push(Math.round(parseFloat(value.term)));
             retval.datasets[0].data.push(value.count);
 
-        } else if (dsType == "WEIGHT") {
+        } else if (dsType === "WEIGHT") {
 
             retval.labels.push(Math.round( parseFloat( value.term) * 2.20462  ));  //Converting kilograms to pounds; we probably should make this an option, as many researchers would likely prefer kilos
             retval.toolTipLabels.push(Math.round(parseFloat(value.term) * 2.20462));
             retval.datasets[0].data.push(value.count);
 
-        } else if (dsType == "DRUGROLE") {
+        } else if (dsType === "DRUGROLE") {
 
             retval.labels.push(value.term.toString().replace("1", "Suspect drug").replace("2", "Concomitant drug").replace("3", "Interacting drug"));
             retval.toolTipLabels.push(value.term.toString().replace("1", "Suspect drug").replace("2", "Concomitant drug").replace("3", "Interacting drug"));
@@ -499,62 +499,62 @@ function FDADate(dval) {
 }
 
 function drawGraph(dater){
-	var data = fixUpFDAData(dater);
-    
-	//console.log(data);
-	var options = {
-	    //Boolean - Whether the scale should start at zero, or an order of magnitude down from the lowest value
-	    scaleBeginAtZero: true,
+        var data = fixUpFDAData(dater);
 
-	    //Boolean - Whether grid lines are shown across the chart
-	    scaleShowGridLines: false,
+        //console.log(data);
+        var options = {
+            //Boolean - Whether the scale should start at zero, or an order of magnitude down from the lowest value
+            scaleBeginAtZero: true,
 
-	    //String - Colour of the grid lines
-	    scaleGridLineColor: "rgba(0,0,0,.2)",
+            //Boolean - Whether grid lines are shown across the chart
+            scaleShowGridLines: false,
 
-	    // String - Colour of the scale line
-	    scaleLineColor: "rgba(255,255,255,1.0)",
+            //String - Colour of the grid lines
+            scaleGridLineColor: "rgba(0,0,0,.2)",
 
-	    // String - Scale label font colour
-	    scaleFontColor: "#fff",
+            // String - Colour of the scale line
+            scaleLineColor: "rgba(255,255,255,1.0)",
 
-	    // Number - Scale label font size in pixels
-	    scaleFontSize: 14,
+            // String - Scale label font colour
+            scaleFontColor: "#fff",
 
-	    // String - Scale label font weight style
-	    scaleFontStyle: "normal",
+            // Number - Scale label font size in pixels
+            scaleFontSize: 14,
 
-	    //Number - Width of the grid lines
-	    scaleGridLineWidth: 1,
+            // String - Scale label font weight style
+            scaleFontStyle: "normal",
 
-	    //Boolean - Whether to show horizontal lines (except X axis)
-	    scaleShowHorizontalLines: true,
+            //Number - Width of the grid lines
+            scaleGridLineWidth: 1,
 
-	    //Boolean - Whether to show vertical lines (except Y axis)
-	    scaleShowVerticalLines: true,
+            //Boolean - Whether to show horizontal lines (except X axis)
+            scaleShowHorizontalLines: true,
 
-	    //Boolean - If there is a stroke on each bar
-	    barShowStroke: true,
+            //Boolean - Whether to show vertical lines (except Y axis)
+            scaleShowVerticalLines: true,
 
-	    //Number - Pixel width of the bar stroke
-	    barStrokeWidth: 5,
+            //Boolean - If there is a stroke on each bar
+            barShowStroke: true,
 
-	    //Number - Spacing between each of the X value sets
-	    barValueSpacing: 5,
+            //Number - Pixel width of the bar stroke
+            barStrokeWidth: 5,
 
-	    //Number - Spacing between data sets within X values
-	    barDatasetSpacing: -10,
+            //Number - Spacing between each of the X value sets
+            barValueSpacing: 5,
 
-	    //String - A legend template
-	    legendTemplate: "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<datasets.length; i++){%><li><span style=\"background-color:<%=datasets[i].fillColor%>\"></span><%if(datasets[i].label){%><%=datasets[i].label%><%}%></li><%}%></ul>"
-	}
+            //Number - Spacing between data sets within X values
+            barDatasetSpacing: -10,
+
+            //String - A legend template
+            legendTemplate: "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<datasets.length; i++){%><li><span style=\"background-color:<%=datasets[i].fillColor%>\"></span><%if(datasets[i].label){%><%=datasets[i].label%><%}%></li><%}%></ul>"
+        };
 
 
     //setup chart
-	$("#chartTarg").css("width", (parseInt(data.labels.length) * 20).toString() + "px");
-	$("#chartTarg").css("height","540px");
+        $("#chartTarg").css("width", (parseInt(data.labels.length) * 20).toString() + "px");
+        $("#chartTarg").css("height","540px");
     //instantiate our chart canvas
-	myBarChart = new Chart($("#chartTarg").get(0).getContext("2d")).Bar(data, options);
+        myBarChart = new Chart($("#chartTarg").get(0).getContext("2d")).Bar(data, options);
 }
 
 function drawTier2Graph(dater,dsType) {
@@ -608,7 +608,7 @@ function drawTier2Graph(dater,dsType) {
 
         //String - A legend template
         legendTemplate: "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<datasets.length; i++){%><li><span style=\"background-color:<%=datasets[i].fillColor%>\"></span><%if(datasets[i].label){%><%=datasets[i].label%><%}%></li><%}%></ul>"
-    }
+    };
 
 
     //setup chart
@@ -619,34 +619,34 @@ function drawTier2Graph(dater,dsType) {
 }
 
 function createDTSDataSet(dset) {
-    //wordlist of properties on the data record to retrieve.  Must be in the iorder that they appear on the record
-    
+    //wordlist of properties on the data record to retrieve.  Must be in the order that they appear on the record
+
     var retDset = [];
-    
+
     $(dset).each(function (k, v) {
 
-        var retRow = Array(13).join(".").split(".");
+        var retRow = new Array(13).join(".").split(".");
 
 
-        try { retRow[0] = v[keyWL[0]]; } catch (e) { retRow[0] = ""; }                                //"safetyreportid",   
-            
+        try { retRow[0] = v[keyWL[0]]; } catch (e) { retRow[0] = ""; }                                //"safetyreportid",
+
         $(v["patient"]["reaction"]).each(function (kEy, vAl) {  //"reactionmeddrapt"];
             retRow[1] += vAl[keyWL[1]] + ',';
-        });   
-            
-        try {  retRow[2] = v["patient"][keyWL[2]];   } catch (e) { retRow[2] = ""; }      //  "patientweight"];
+        });
+
+        try { retRow[2] = v["patient"][keyWL[2]];  } catch (e) { retRow[2] = ""; }      //  "patientweight"];
         try { retRow[7] = v["patient"][keyWL[7]];  } catch (e) { retRow[7] = ""; }          // "patientsex"];
 
         try { retRow[6] = v["patient"][keyWL[6]]; } catch (e) { retRow[6] = ""; } //  "patientonsetage"];
 
-        $(v["patient"]["drug"]).each(function (kEy, vAl) {  
+        $(v["patient"]["drug"]).each(function (kEy, vAl) {
 
 
             try { retRow[3] += vAl[keyWL[4]] + ":" + vAl[keyWL[3]] + ','; } catch (e) { retRow[3] = "";}          // "drugcharacterization"];
             try { retRow[4] += vAl[keyWL[4]] + ','; } catch (e) { retRow[4] = ""; }           //  "medicinalproduct"];
             try {
 
-                retRow[5] += ($.isArray(vAl[keyWL[5]])) ? vAl[keyWL[5]].join(',') : (( vAl[keyWL[5]] != undefined ) ? vAl[keyWL[5]] : "" ) ;
+                retRow[5] += ($.isArray(vAl[keyWL[5]])) ? vAl[keyWL[5]].join(',') : (( vAl[keyWL[5]] !== undefined ) ? vAl[keyWL[5]] : "" ) ;
 
             } catch (e) {
                 retRow[5] = "";
@@ -659,9 +659,9 @@ function createDTSDataSet(dset) {
 
         });
 
-        retDset.push(retRow);          
+        retDset.push(retRow);
     });
-       
+
 
     $('#tblcontainer').html('<table cellpadding="0" cellspacing="0" border="0" class="table table-striped table-bordered" id="example" ></table>');
 
@@ -677,37 +677,37 @@ function createDTSDataSet(dset) {
             "sSearch": "Filter Terms:",
             "sZeroRecords": "There are no records that match your search criteria",
             "sLengthMenu": '_MENU_'
-			},
+                        },
         "fnInitComplete": function () {
             $('.dtlength label').prepend("Number of Records to Display:&nbsp;&nbsp;");
-			$('.btnExportGrid').append(
-				$('<button></button>')
-				.text('Export Table Data')
-				.on('click',function(){
-					JSONToCSVConvertor(prepTableDataForExport($('#example').dataTable().api().data(),keyWLDataColumns), $('#tier2modalhead').text(), true);
-				})
-			);
-        },	
-		"sDom": "<'btnExportGrid'><'clear'><'box-content'<'col-sm-3'f><'col-sm-9 text-right dtlength'l><'clearfix'>>rt<'box-content'<'col-sm-6'i><'col-sm-6 text-right'p><'clearfix'>>"
+                        $('.btnExportGrid').append(
+                                $('<button></button>')
+                                .text('Export Table Data')
+                                .on('click',function(){
+                                        JSONToCSVConvertor(prepTableDataForExport($('#example').dataTable().api().data(),keyWLDataColumns), $('#tier2modalhead').text(), true);
+                                })
+                        );
+        },
+                "sDom": "<'btnExportGrid'><'clear'><'box-content'<'col-sm-3'f><'col-sm-9 text-right dtlength'l><'clearfix'>>rt<'box-content'<'col-sm-6'i><'col-sm-6 text-right'p><'clearfix'>>"
     });
 }
 
 function prepTableDataForExport(dater,colnames){
-	var retval = [];
-	//for each item in the incoming dater, create array of objects, replacing the numeric key with the appropriate textual key
-	$(dater).each(function(index,childarray){
-		//loop over the child array
-		var thisobj = {};
-		$(childarray).each(function(i,val){
-			//setting the key by looking up the corresponding column name in the columns array
-		    try {
-		        thisobj[colnames[i].sTitle] = val;
-		    } catch (e) {
-		    }
-		});
-		retval.push(thisobj);
-	});
-	return retval;
+        var retval = [];
+        //for each item in the incoming dater, create array of objects, replacing the numeric key with the appropriate textual key
+        $(dater).each(function(index,childarray){
+                //loop over the child array
+                var thisobj = {};
+                $(childarray).each(function(i,val){
+                        //setting the key by looking up the corresponding column name in the columns array
+                    try {
+                        thisobj[colnames[i].sTitle] = val;
+                    } catch (e) {
+                    }
+                });
+                retval.push(thisobj);
+        });
+        return retval;
 }
 
 function listAllProperties(o) {
@@ -723,80 +723,79 @@ function listAllProperties(o) {
 
 function JSONToCSVConvertor(JSONData, ReportTitle, ShowLabel) {
     //If JSONData is not an object then JSON.parse will parse the JSON string in an Object
-    var arrData = typeof JSONData != 'object' ? JSON.parse(JSONData) : JSONData;
-    
-    var CSV = '';    
+    var arrData = typeof JSONData !== 'object' ? JSON.parse(JSONData) : JSONData;
+
     //Set Report title in first row or line
-    
-    CSV += ReportTitle + '\r\n\n';
+    var CSV = ReportTitle + '\r\n\n';
+    var row = "", index;
 
     //This condition will generate the Label/Header
     if (ShowLabel) {
-        var row = "";
-        
+        row = "";
+
         //This loop will extract the label from 1st index of on array
-        for (var index in arrData[0]) {
-            
+        for (index in arrData[0]) {
+
             //Now convert each value to string and comma-seprated
             row += index + ',';
         }
 
         row = row.slice(0, -1);
-        
+
         //append Label row with line break
         CSV += row + '\r\n';
     }
-    
+
     //1st loop is to extract each row
     for (var i = 0; i < arrData.length; i++) {
-        var row = "";
-        
+        row = "";
+
         //2nd loop will extract each column and convert it in string comma-seprated
-        for (var index in arrData[i]) {
+        for (index in arrData[i]) {
             row += '"' + arrData[i][index] + '",';
         }
 
         row.slice(0, row.length - 1);
-        
+
         //add a line break after each row
         CSV += row + '\r\n';
     }
 
-    if (CSV == '') {        
+    if (CSV === '') {
         alert("Invalid data");
         return;
-    }   
-    
+    }
+
     //Generate a file name
     var fileName = "MyReport_";
     //this will remove the blank-spaces from the title and replace it with an underscore
-    fileName += ReportTitle.replace(/ /g,"_");   
-    
+    fileName += ReportTitle.replace(/ /g,"_");
+
     //Initialize file format you want csv or xls
     var uri = 'data:text/csv;charset=utf-8,' + escape(CSV);
-    
+
     // Now the little tricky part.
     // you can use either>> window.open(uri);
     // but this will not work in some browsers
-    // or you will not get the correct file extension    
-    
+    // or you will not get the correct file extension
+
     //this trick will generate a temp <a /> tag
-    var link = document.createElement("a");    
+    var link = document.createElement("a");
     link.href = uri;
-    
+
     //set the visibility hidden so it will not effect on your web-layout
     link.style = "visibility:hidden";
     link.download = fileName + ".csv";
-    
+
     //this part will append the anchor tag and remove it after automatic click
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
 }
 
-/* 
+/*
  *   makeEmptyBundles is a helper function, designed to create a collection of
- *                    empty cells intended to assist bundling (grouping) 
+ *                    empty cells intended to assist bundling (grouping)
 *                     data whose terms are best expressed as numbers.
  *                    For example, group ages by decades ("0-10","11-20", ... "81-90")
  *                                 or weights by 50 (pound) increments ("0-50","51-100", etc.)
@@ -823,7 +822,7 @@ function makeEmptyBundles(maxMagnitude,groupsOf) {
         x = 0;
 
         while(x<maxCells) {
-              var newItem = new Object();
+              var newItem = {};
               newItem.term = (x === 0) ? '0' : (((x * groupsOf)+1)+'');
               newItem.term = newItem.term + '-' + (((x+1)*groupsOf)+'');  //Now, label is a string range; e.g. "0-10", "11-20", etc.
               newItem.count = 0;
@@ -872,6 +871,6 @@ function bundleDataByType(sortedIn, dsType) {
        }
 
        //Otherwise... just return the input
-       return sortedIn;  
+       return sortedIn;
 }
 
