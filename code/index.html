@@ -14,7 +14,6 @@
     <link rel="stylesheet" href="css/bootstrap-datepicker.standalone.css">
 	<link rel="stylesheet" href="css/datatables.bootstrap.css">
 
-
     <script src="scripts/jquery-2.1.4.min.js"></script>
     <script src="scripts/jquery-ui-1.11.4.min.js"></script>
     <script src="scripts/bootstrap.min.js"></script>
@@ -22,7 +21,6 @@
     <script src="scripts/chartGlobalOptions.js"></script>
     <script src="scripts/Dialog.js"></script>
     <script src="scripts/bootstrap-datepicker.js"></script>
-
 	
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -246,7 +244,12 @@
                                         </div>
 
                                         <div class="form-group">
-                                            <label for="WEIGHT" class="control-label">WEIGHT</label>
+                                            <label for="WEIGHT_KG" class="control-label">WEIGHT (kgs)</label>
+                                            <input name="ChartType" id="WEIGHT_KG" type="radio" class="fa" value="patient.patientweight" />
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="WEIGHT" class="control-label">WEIGHT (lbs)</label>
                                             <input name="ChartType" id="WEIGHT" type="radio" class="fa" value="patient.patientweight" />
                                         </div>
 
