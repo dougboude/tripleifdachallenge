@@ -557,6 +557,7 @@ function drawGraph(dater){
 
     //setup chart
 	$("#chartTarg").css("width", (parseInt(data.labels.length) * 20).toString() + "px");
+	$("#chartTarg").css("min-width","300px");
 	$("#chartTarg").css("height","540px");
     //instantiate our chart canvas
 	myBarChart = new Chart($("#chartTarg").get(0).getContext("2d")).Bar(data, options);
