@@ -1111,7 +1111,24 @@ function bundleData(sortedIn, groupsOf) {
 function bundleDataByType(sortedIn, dsType) {
 
     if (dsType === "AGE") {
-        return bundleData(sortedIn, 10);
+        //For reasons unknown, developers have seen vastly out-of-range alleged ages returned by FDA
+        //Aug 27, 2010, for example, has four terms that would appear to claim patient ages MUCH greater than 110 years
+        //Filtering out the gross-offenders
+        var i = 0;
+        for (i = 0; i<sortedIn.length; i++) {
+           if (sortedIn[i].term > 110) {
+              //Alleged age unreasonably large.  We are arbitrarily using 110 years as our GIGO filter point
+              break;
+           }
+        }
+
+        if (i === sortedIn.length) {
+           return bundleData(sortedIn, 10);
+        } else {
+           var bundledRetVal = bundleData(sortedIn.slice(0, i), 10);
+           bundledRetVal.push({term: '# OUT-OF-RANGE VALUES', count: sortedIn.length - i});
+           return bundledRetVal;
+        }
     }
 
     if (dsType === "WEIGHT") {
