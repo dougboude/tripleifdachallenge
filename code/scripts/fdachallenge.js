@@ -5,6 +5,8 @@ var myBarChart = ""; //setting a global variable so we can access our chart from
 var activeBars = {};
 var tier2chart = "";
 
+var tier1AggMetadata = {};//global var to hold metadata associated with the current tier1 aggregate chart. Needed in order to accurately get the relevant date ranges for a clicked bar
+
 var keyWL = ["safetyreportid", "reactionmeddrapt", "patientweight", "drugcharacterization", "medicinalproduct","drugdosagetext", "patientonsetage", "patientsex", "route", "pharm_class_epc", "generic_name"];
 
 var keyWLDataColumns = [    
@@ -284,7 +286,7 @@ function getTier2Data(selectedDate, drugname, reactionname, substancename) {
 function getTier2DataRaw(selectedDate, drugname, reactionname, substancename) {
 
     var qry = buildtier2Query(selectedDate, drugname, reactionname, substancename);
-console.log(qry);
+//console.log(qry);
     $.ajaxSetup({
         error: function (x, e) {
 
@@ -304,17 +306,31 @@ console.log(qry);
 
     $.get(qry + "&limit=100", function (data) { createDTSDataSet(data.results); }, "json");
 
-    console.log(qry + "&limit=100");
+    //console.log(qry + "&limit=100");
 }
 
 function buildtier2Query(selectedDate, drugname, reactionname, substancename){
 
     var sDate = "";
+	var sDate2 = "";
     var drugs = "";
     var reaction = "";
     var substance = "";
+	var receivedDate = "";
 
-    sDate = FDADate(selectedDate);
+	if(selectedDate.split("-") == 3){
+		//this is a single date. Query for data on that date alone
+		sDate = FDADate(selectedDate);
+	} else {
+		//we can assume this is a value from a chart that displayed aggregated data. We'll look in the tier1AggMetadata for the to and from dates we need
+		if(!(selectedDate in tier1AggMetadata)){
+			//wow. not sure what to make of this. Die loudly.
+			console.log('BOOM!');
+		} else {
+			sDate = tier1AggMetadata[selectedDate][0];
+			sDate2 = tier1AggMetadata[selectedDate][1];
+		}
+	}
 
     if (!drugname.match(/^$/)) {
         drugs = "(generic_name:" + drugname + ")+AND+";
@@ -328,7 +344,12 @@ function buildtier2Query(selectedDate, drugname, reactionname, substancename){
         reaction = "(patient.reaction.reactionmeddrapt:" + reactionname + ")+AND+";
     }
 
-    return apirooturl + drugs + reaction + substance + "receivedate:" + sDate;
+	if (sDate2 != ""){
+		receivedDate = "receivedate:[" + sDate + "+TO+" + sDate2 + "]";
+	} else {
+		receivedDate = "receivedate:" + sDate;
+	}
+    return apirooturl + drugs + reaction + substance + receivedDate;
 }
 
 function getSpecificItemData(target){
@@ -771,6 +792,8 @@ function timeGroup(dater,groupby){
 	var aggVal = 0;
 	var tmpdate = "";
 
+	tier1AggMetadata = {};//resetting this global hash
+	
 	if(groupby == "day"){
 		return dater;
 	}
@@ -811,6 +834,11 @@ function timeGroup(dater,groupby){
 		//group key all made! Let's start tracking key values vs iterations.
 		lastkey = (lastkey == "")?thiskey:lastkey;//on our very first pass, lastkey will be blank...so grab thiskey value!
 
+		//build our metadata object. Does this key exist in the object?
+		if(!(thiskey in tier1AggMetadata)){
+			tier1AggMetadata[thiskey] = [value.time,"0"];
+		}
+		
 		//do we push this object on to the stack, or go around again?
 		if(thiskey != lastkey || key == dater.length-1){//either the key value changed since last iteration, OR we're at the end of our dater set
 			aggVal += value.count;
@@ -822,6 +850,9 @@ function timeGroup(dater,groupby){
 		
 		//our current key will become our lastkey in our next iteration, so capture it!
 		lastkey = thiskey;
+
+		//updating the end value for this group. We update one very iteration to ensure we always capture the final date for the group.
+		tier1AggMetadata[thiskey][1]=value.time;
 	});
 
 	return retval;
